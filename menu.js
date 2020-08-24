@@ -14,7 +14,7 @@ let leagueEntry = (my_league > 3) ? 3 : my_league;
 
 let color = {"bronze": 0, "gold": 1, "brilliant": 2};
 
-let minCountExtBuy = {101: 1, 102: 1, 103: 1, 104: 1, 107: 1, 114: 3};
+let minCountExtBuy = {101: 5, 102: 1, 103: 3, 104: 2, 107: 1, 114: 3};
 
 let minCountClanExtBuy = {155: 3, 156: 3, 170: 3, 159: 3};
 
@@ -25,6 +25,10 @@ let countSendMega = 0;
 let questKiller = false;
 
 let userKiller;
+
+let taroMan = 0;
+
+let taroMaf = 0;
 
 let auctionRolesSuik = {4: 42, 6: 43, 10: 44, 11: 44, 12: 45, 9: 46, 25: 47, 3: 48}
 
@@ -46,7 +50,7 @@ let questExtCount = {
 	
 	70: [170, 3], 
 	
-	67: [157, 1], 
+	67: [157, 3], 
 	
 	66: [156, 3], 
 	
@@ -69,6 +73,92 @@ let questExtCount = {
 } 
 
 let myExtraCount = {};
+
+let personSquad = {
+	
+	/**********Мафиози**********/
+	
+	1: [2, 9, 25, 47],
+	
+	/**********Тони**********/
+	
+	2: [16, 17, 30, 31, 32, 33, 41],
+	
+	/**********Профессор**********/
+	
+	3: [18, 19, 42],
+	
+	/**********Лили**********/
+	
+	4: [20],
+	
+	/**********Банда**********/
+	
+	5: [21, 24, 43],
+	
+	/**********Якудза**********/
+	
+	6: [35, 36, 37, 38],
+	
+	/**********Потрошитель**********/
+	
+	7: [34],
+	
+	/**********Борода**********/
+	
+	8: [40],
+	
+	/**********Убийца 1**********/
+	
+	9: [44],
+	
+	/**********Убийца 2**********/
+	
+	10: [45],
+	
+	/**********Убийца 3**********/
+	
+	11: [46],
+	
+	/**********Маньяк**********/
+	
+	12: [3]
+	
+}
+
+let extraTextProva = {
+		
+		104: 'Детектор лжи дал результаты: ', 
+		
+		125: 'Новогодние Таро раскрыли роль: ',
+		
+		132: 'Таро от Лили раскрыли роль: ',
+		
+		145: 'Пасхальные Таро раскрыли роль: ',
+		
+		155: ' раскрыл вам свою роль',
+		
+		156: 'Карты таро раскрыли вам роль: ', 
+		
+		197: 'Эликсир правды раскрыл роль: ',
+		
+		203: 'Пытки паяльником дали результат: ',
+		
+		239: ' раскрыл всем свою роль, открыв «Коробку с сюрпризом»',
+		
+		240: 'Джокер раскрыл роль случайного игрока: ',
+		
+		292: 'Карнавальные Таро раскрыли роль: ',
+		
+		302: 'Прогревание «Утюгом Тони» дало результат: ',
+		
+		317: 'Таро от Бандитос раскрыли роль: ',
+		
+		329: 'Экстра «Негативный эффект раскрыла роль: '
+		
+};
+
+let prigUsers = {};
 
 /**********Стили меню**********/
 let my__style = '\
@@ -270,6 +360,8 @@ let my__style = '\
 const readLocalStorage = (key) => { 
 
 	/**********Получение значения по ключу из локального хранилища**********/
+	
+	key = key + '_' + my_id;
 
 	let resultLS = JSON.parse(localStorage.getItem(key));
 
@@ -336,6 +428,8 @@ const writeLocalStorage = (section, elementId, block) => {
 			break;
 
 	}
+
+	section = section + '_' + my_id;
 
 	localStorage.setItem(section, JSON.stringify(elementsLS));
 
@@ -407,6 +501,8 @@ let titleQuestsBlock = ['Без суика', 'С суиком'];
 let questsBlock = '';
 
 for (let key in listQuests) {
+	
+	key = parseInt(key);
 
 	let listItems = '';
 
@@ -717,7 +813,7 @@ const botExit = () => {
 
 };
 
-const EnterTheRoom = async (e) => { 
+const EnterTheRoom = async (uCount) => { 
 
 	/**********Поиск комнат и вход**********/
 	
@@ -742,11 +838,23 @@ const EnterTheRoom = async (e) => {
 				$.each(data.gml, (i, row) => {
 
 					let delta = row[3] - row[7];
+					
+					if (uCount > 8) {
+						
+						if (row[3] == uCount && row[4] <= leagueEntry && delta > 0 && row[5] == "20"){
 
-					if (row[3] == 8 && row[4] == leagueEntry && delta < 5 && delta > 0 && row[5] == "20"){
+							_GM_action('gml', 'join', row[0], event);
 
-						_GM_action('gml', 'join', row[0], event);
+						}
+						
+					} else {
 
+						if (row[3] == uCount && row[4] == leagueEntry && delta < 5 && delta > 0 && row[5] == "20"){
+
+							_GM_action('gml', 'join', row[0], event);
+
+						}
+						
 					}
 
 				});
@@ -842,6 +950,8 @@ const rewardActualQuests = async () => {
 		/**********Сбор жетонов и наград**********/
 		
 		leagueProc('collect_all');
+		
+		$('.questCompletePopup').remove();
 	
 		$('#wnd_newbie').remove();
 		
@@ -931,9 +1041,13 @@ const rewardActualQuests = async () => {
 		
 		//console.info(result[0], result[1]);
 		
-		//runQuests(result[0], result[1]);
+		if (result[0].length) {
 		
-		runQuests([75, 71, 62], [4, 4, 4]);
+			runQuests(result[0], result[1]);
+			
+		}
+		
+		//runQuests([7, 50, 65], [0, 4, 4]);
 		
 		//rewardActualQuests();
 		
@@ -985,17 +1099,17 @@ const extraBuy = (ext) => {
 
 }
 
-const useExtra = (arr, listKill) => {
+const useExtra = (arr, listKill, extraUserId) => {
 
 	/**********Применение экстры**********/
 
 	let questEnd = true;
 	
-	$.each(arr, function(i, val) {
+	$.each(arr, (i, val) => {
 		
 		if (parseInt($('#gxt_' + val).not('.disabled').find('.count').text())) {
 		
-			if ((pla_data["e101"] && val == 101) || (pla_data["e104"] && val == 104) || (pla_data["e114"] && val == 114) || (pla_data["e103"] && val == 103)) {
+			if ((pla_data["e101"] && val == 101) || (pla_data["e104"] && val == 104) || (pla_data["e114"] && val == 114) || (pla_data["e103"] && val == 103) || (pla_data["e157"] && val == 157)) {
 				
 				return true;
 				
@@ -1014,6 +1128,8 @@ const useExtra = (arr, listKill) => {
 				questEnd = false;
 				
 				let uid = (val == 115) ? randomPlayer(listKill) : randomPlayer();
+				
+				if (extraUserId) uid = extraUserId;
 		
 				//let uid = randomPlayer();
 
@@ -1042,6 +1158,12 @@ const runQuests = (my_quests, my_quests_limit) => {
 	switch (ifc_mode) {
 		
 		case 'chat':
+		
+			taroMan = 0;
+
+			taroMaf = 0;
+			
+			prigUsers = {};
 		
 			questsFinish = {};
 
@@ -1073,17 +1195,37 @@ const runQuests = (my_quests, my_quests_limit) => {
 			
 			if (!startChangeTask){
 				
+				let usersCountRoom = 8;
+				
 				let allowRoom = true;
 				
 				$.each(my_quests, (i, quest) => {
 					
-					//console.info(activeTasks[i], my_quests_limit[i], __dqs[quest].limits[i], quest, discountGift, giftsSendTo);
+					//console.info(activeTasks[i], my_quests_limit[i], __dqs[quest].limits[i], quest);
 					
 					if (!activeTasks[i]) return true;
 					
 					if (__dqs[quest].limits[i] > my_quests_limit[i]){
 				
 						switch (quest) {
+							
+							case 7: 
+							
+								usersCountRoom = 12;
+							
+								break;
+								
+							case 8: 
+							
+								usersCountRoom = 16;
+							
+								break;
+								
+							case 9: 
+							
+								usersCountRoom = 20;
+							
+								break;
 							
 							case 81: 
 							
@@ -1151,7 +1293,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 
 					});
 					
-					EnterTheRoom();
+					EnterTheRoom(usersCountRoom);
 					
 				}
 				
@@ -1173,7 +1315,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 					
 						/**********Проверка и покупка обычных экстр**********/
 					
-						$.each(minCountExtBuy, function(key, val) {
+						$.each(minCountExtBuy, (key, val) => {
 							
 							let countExtra = myExtraCount[key];
 							
@@ -1195,7 +1337,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 					
 						/**********Проверка и покупка клановых экстр**********/
 					
-						$.each(minCountClanExtBuy, function(key, val) {
+						$.each(minCountClanExtBuy, (key, val) => {
 							
 							let countExtra = myExtraCount[key];
 							
@@ -1303,14 +1445,208 @@ const runQuests = (my_quests, my_quests_limit) => {
 		
 			$.each(my_quests, (i, quest) => {
 				
+				//console.info('tip', quest);
+				
 				if (!activeTasks[i] || questsFinish[quest]) return true;
 				
 				let autosuik = false;
 				
-				if (__dqs[quest].limits[i] > my_quests_limit[i]){
+				if (__dqs[quest].limits[i] > my_quests_limit[i]) {
 			
 					switch (quest) {
 						
+						case 1:
+						
+							questsFinish[quest] = (!__team_by_person(pla_data['person'])) ? 1 : 0;
+
+							break;
+							
+						case 2:
+						
+							questsFinish[quest] = (pla_data['person'] != 2 && pla_data['person'] != 9 && pla_data['person'] != 25 && pla_data['person'] != 47) ? 1 : 0;
+
+							break;
+							
+						case 3:
+						
+							questsFinish[quest] = (!__team_by_person(pla_data['person'])) ? 1 : 0;
+
+							break;
+							
+						case 4:
+						
+							questsFinish[quest] = (__team_by_person(pla_data['person'])) ? 1 : 0;
+
+							break;
+							
+						case 5:
+						
+							questsFinish[quest] = (pla_data['person'] == 3) ? 1 : 0;
+
+							break;
+							
+						case 6:
+						
+						case 7:
+						
+						case 8:
+						
+						case 9:
+						
+						case 10:
+						
+						case 11:
+						
+							questsFinish[quest] = 0;
+
+							break;
+							
+						case 12:
+						
+							questsFinish[quest] = (pla_data['person'] != 1) ? 1 : 0;
+
+							break;
+							
+						case 13:
+						
+							questsFinish[quest] = (pla_data['person'] != 4) ? 1 : 0;
+
+							break;
+							
+						case 14:
+						
+							questsFinish[quest] = (pla_data['person'] != 6) ? 1 : 0;
+
+							break;
+							
+						case 15:
+						
+							questsFinish[quest] = (pla_data['person'] != 10 && pla_data['person'] != 11) ? 1 : 0;
+
+							break;
+							
+						case 16:
+						
+							questsFinish[quest] = (pla_data['person'] != 12) ? 1 : 0;
+
+							break;
+							
+						case 17:
+						
+							questsFinish[quest] = (pla_data['person'] != 2) ? 1 : 0;
+
+							break;
+							
+						case 18:
+						
+							questsFinish[quest] = (pla_data['person'] != 9) ? 1 : 0;
+
+							break;
+							
+						case 19:
+						
+							questsFinish[quest] = (pla_data['person'] != 25) ? 1 : 0;
+
+							break;
+							
+						case 20:
+						
+							questsFinish[quest] = (pla_data['person'] != 3) ? 1 : 0;
+
+							break;
+							
+						case 21:
+						
+							questsFinish[quest] = 0;
+
+							break;
+							
+						case 22:
+						
+							questsFinish[quest] = 0;
+
+							break;
+							
+						case 24:
+						
+							questsFinish[quest] = (pla_data['person'] != 25) ? 1 : 0;
+
+							break;
+							
+						case 25:
+						
+							//console.info('tip2', quest);
+						
+							questsFinish[quest] = (pla_data['person'] != 2) ? 1 : 0;
+
+							break;
+							
+						case 26:
+						
+							questsFinish[quest] = (pla_data['person'] != 3) ? 1 : 0;
+
+							break;
+							
+						case 27:
+						
+							questsFinish[quest] = (pla_data['person'] != 9) ? 1 : 0;
+
+							break;
+							
+						case 28:
+						
+							questsFinish[quest] = (pla_data['person'] != 9) ? 1 : 0;
+
+							break;
+							
+						case 29:
+						
+							questsFinish[quest] = (pla_data['person'] != 4) ? 1 : 0;
+
+							break;
+							
+						case 30:
+						
+							questsFinish[quest] = (pla_data['person'] != 6) ? 1 : 0;
+
+							break;
+							
+						case 31:
+						
+							questsFinish[quest] = (pla_data['person'] != 10 && pla_data['person'] != 11) ? 1 : 0;
+
+							break;
+							
+						case 32:
+						
+							questsFinish[quest] = (pla_data['person'] != 12) ? 1 : 0;
+
+							break;
+
+						case 33:
+						
+							questsFinish[quest] = (pla_data['person'] != 25) ? 1 : 0;
+
+							break;
+							
+						case 34:
+						
+							questsFinish[quest] = 0;
+
+							break;
+							
+						case 35:
+						
+							questsFinish[quest] = 0;
+
+							break;
+							
+						case 41:
+						
+							questsFinish[quest] = 0;
+
+							break;
+
 						case 52: 
 						
 							/**********Жучок**********/
@@ -1319,7 +1655,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 								questsEnd = (parseInt($('#gxt_101').not('.disabled').find('.count').text())) ? useExtra([101]) : true;
 								
-								questsFinish[quest] = 1;
+								questsFinish[quest] = listQuests[1].includes(quest) ? 1 : 0;
 								
 							}
 								
@@ -1331,7 +1667,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							questsEnd = (parseInt($('#gxt_104').not('.disabled').find('.count').text())) ? useExtra([104]) : true;
 							
-							questsFinish[quest] = 1;
+							questsFinish[quest] = listQuests[1].includes(quest) ? 1 : 0;
 								
 							break;
 						
@@ -1399,6 +1735,8 @@ const runQuests = (my_quests, my_quests_limit) => {
 								
 								_DLG('exit', 2, event);
 								
+								//setTimeout(() => !pla_data['dead'] ? _DLG('exit', 2, event) : false, 5000);
+								
 							}
 
 							questsEnd = (parseInt($('#gxt_115').not('.disabled').find('.count').text())) ? useExtra([115], userKiller) : true;
@@ -1451,12 +1789,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 								
 							}
 							
-							if (questsEnd) {
-								
-								questsFinish[quest] = 1;
-								
-							}							
-
 							break;						
 						
 						case 70: 
@@ -1496,15 +1828,9 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Карты таро на мафию**********/
 						
-							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][34] || gam_data["v_left"][47]) {
-
-								questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156]) : true;
+							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][25] || gam_data["v_left"][47]) {
 								
-								if (questsEnd) {
-									
-									questsFinish[quest] = 1;
-									
-								}
+								taroMaf = 1;
 
 							} else {
 								
@@ -1519,14 +1845,8 @@ const runQuests = (my_quests, my_quests_limit) => {
 							/**********Карты таро на маньяка**********/
 						
 							if (gam_data["v_left"][3]) {
-
-								questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156]) : true;
 								
-								if (questsEnd) {
-									
-									questsFinish[quest] = 1;
-									
-								}
+								taroMan = 1;
 
 							} else {
 								
@@ -1540,7 +1860,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Автомат свинец на мафию**********/ 
 						
-							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][34] || gam_data["v_left"][47]) {
+							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][25] || gam_data["v_left"][47]) {
 
 								questsEnd = (parseInt($('#gxt_159').not('.disabled').find('.count').text())) ? useExtra([159]) : true;
 								
@@ -1652,16 +1972,70 @@ const runQuests = (my_quests, my_quests_limit) => {
 					
 					questsFinish[quest] = 1;
 					
+					if (quest == 62) {
+						
+						questKiller = false;
+						
+					}
+					
 					//questsEnd = true; 
 					
 				}
 
-			});		
+			});
+			
+			let suikExit = 0;
+			
+			for (var q in questsFinish) {
+				
+				q = parseInt(q);
 
-			if ($('.my.idead').length || $('#pp_fin').length){
+				if (!suikExit && questsFinish[q] && listQuests[1].includes(q)) {
+					
+					suikExit = 1;
+					
+				}
+				
+			}
+			
+			let i = 0;
+			
+			for (var q in questsFinish) {
+				
+				q = parseInt(q);
+
+				if (suikExit && !questsFinish[q] && activeTasks[i] == 2) {
+					
+					suikExit = 0;
+					
+				}
+				
+				i++;
+				
+			}	
+			
+			suikExit = 0;
+			
+			//console.info('suik', suikExit);
+			
+			if ($('.my.idead').length || $('#pp_fin').length || suikExit){
 
 				botExit();
 
+			}
+			
+			readExtraResult();
+
+			readProva();
+			
+			readSMS();
+			
+			readUserList();
+			
+			if (pla_data['kvt']) {
+				
+				judgment();
+				
 			}
 
 			break;
@@ -1679,6 +2053,459 @@ const runQuests = (my_quests, my_quests_limit) => {
 spouse();
 
 discount();
+
+let readSMS = () => {
+	
+	if ($('#cco_log p').length){
+
+		$('#cco_log p').each((n, sms) => {
+			
+			for (let key in extraTextProva) {
+				
+				key = parseInt(key);
+
+				if ($(sms).text().includes(extraTextProva[key])) {
+					
+					let prov;
+					
+					switch (key) {
+						
+						case 155:
+						
+						case 239:
+						
+							prov = $(sms).text().replace(extraTextProva[key], '').split(' - ');
+						
+							break;
+							
+						default:
+						
+							prov = $(sms).text().split(extraTextProva[key]).pop().split(' - ');
+						
+							break;
+							
+					}
+					
+					let provaNick = prov[0];
+					
+					let provaRole = prov[1];
+
+					let provaId = userList(1, provaNick);
+					
+					if (provaId && !pla_data['kvt']) {
+						
+						setTimeout(() => gam_data['v_mode'] ? runBot(2, provaId, provaNick, provaRole) : false, 3000);
+						
+					}				
+					
+				}
+
+			}		
+			
+		});
+	
+	}
+	
+}
+
+let readExtraResult = () => {
+
+	if ($('#cco_log .extra .text').length){
+	
+		$('#cco_log .extra .text').each((n, prova) => {
+			
+			let extraId = parseInt($(prova).parent().find('img').attr('src').replace(/\D+/g,""));
+	
+			if (extraTextProva[extraId]){
+				
+				let prov;
+				
+				switch (extraId) {
+					
+					case 155:
+					
+					case 239:
+					
+						prov = $(prova).text().replace(extraTextProva[extraId], '').split(' - ');
+					
+						break;
+						
+					default:
+					
+						prov = $(prova).text().split(extraTextProva[extraId]).pop().split(' - ');
+					
+						break;
+						
+				}
+			
+				let provaNick = prov[0];
+				
+				let provaRole = prov[1].replace('Рассказать ', '');
+
+				let provaId = userList(1, provaNick);
+				
+				if (provaId && !pla_data['kvt']) {
+					
+					setTimeout(() => gam_data['v_mode'] ? runBot(2, provaId, provaNick, provaRole) : false, 3000);
+					
+				}
+			
+			}
+			
+		});
+	
+	}
+	
+}
+
+let runBot = (param, id, nick, role) => {
+	
+	//console.info(param, id, nick, role);
+	
+	let questsEnd;
+
+	switch (param) {
+		
+		/**********Голос по прове**********/
+		
+		case 1:
+		
+			switch (role) {
+				
+				case 'маньяка':
+				
+					if (pla_data['person'] != 3) {
+						
+						if (taroMan) {
+
+							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
+						
+							if (questsEnd) {
+							
+								questsFinish[73] = 1;
+							
+							}
+							
+						}
+						
+						if (!pla_data["act"] && gam_data['v_mode']) {
+						
+							_GM_action('', 'vote', 2, [id, 0]);
+							
+						}
+						
+						prigUsers[id] = 1;
+						
+					}
+				
+					break;
+				
+				case 'мафию':
+				
+					if (taroMaf) {
+
+						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
+					
+						if (questsEnd) {
+						
+							questsFinish[72] = 1;
+						
+						}
+						
+					}
+				
+					if (![2, 9, 25, 47].includes(pla_data['person'])) {
+						
+						if (!pla_data["act"] && gam_data['v_mode']) {
+						
+							_GM_action('', 'vote', 2, [id, 0]);
+							
+						}
+						
+						prigUsers[id] = 1;
+						
+					}
+				
+					break;
+					
+				case 'Братьев Бандитос':
+				
+					if (![21, 24, 43].includes(pla_data['person'])) {
+						
+						if (!pla_data["act"] && gam_data['v_mode']) {
+						
+							_GM_action('', 'vote', 2, [id, 0]);
+							
+						}
+						
+						prigUsers[id] = 1;
+						
+					}
+				
+					break;
+					
+				case 'граждан':
+				
+					prigUsers[id] = __team_by_person(pla_data['person']) ? 0 : 1;
+
+					break;
+
+			}		 
+
+			break;
+			
+		/**********Голос по экстрам**********/
+		
+		case 2:
+		
+			switch (role) {
+				
+				case 'Маньяк':
+				
+					if (pla_data['person'] != 3) {
+						
+						if (taroMan) {
+
+							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
+						
+							if (questsEnd) {
+							
+								questsFinish[73] = 1;
+							
+							}
+							
+						}
+						
+						if (!pla_data["act"] && gam_data['v_mode']) {
+						
+							_GM_action('', 'vote', 2, [id, 0]);
+							
+						}
+						
+						prigUsers[id] = 1;
+						
+					}
+				
+					break;
+				
+				case 'Мафиози':
+				
+				case 'Босс мафии':
+				
+				case 'Двуликий':
+				
+				case 'Продажный полицейский':
+				
+					if (taroMaf) {
+
+						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
+					
+						if (questsEnd) {
+						
+							questsFinish[72] = 1;
+						
+						}
+						
+					}
+				
+					if (![2, 9, 25, 47].includes(pla_data['person'])) {
+						
+						if (!pla_data["act"] && gam_data['v_mode']) {
+						
+							_GM_action('', 'vote', 2, [id, 0]);
+							
+						}
+						
+						prigUsers[id] = 1;
+						
+					}
+				
+					break;
+					
+				case 'Санчо':
+				
+				case 'Мигель':
+				
+				case 'Бандит':
+				
+					if (![21, 24, 43].includes(pla_data['person'])) {
+						
+						if (!pla_data["act"] && gam_data['v_mode']) {
+						
+							_GM_action('', 'vote', 2, [id, 0]);
+							
+						}
+						
+						prigUsers[id] = 1;
+						
+					}
+				
+					break;
+					
+				default:
+				
+					prigUsers[id] = __team_by_person(pla_data['person']) ? 0 : 1;
+
+					break;
+
+			}		 
+
+			break;
+			
+		/**********Голос по роли**********/
+		
+		case 3:
+		
+			if (!pla_data["act"] && gam_data['v_mode']) {
+		
+				_GM_action('', 'vote', 2, [id, 0]);
+				
+			}
+			
+			prigUsers[id] = 1;
+		
+			break;
+		
+	}
+	
+}
+
+let readProva = () => {
+	
+	if ($('#cco_log .proverka').length){
+	
+		$('#cco_log .proverka').each((n, prova) => {
+			
+			let prov = $(prova).text().split('сообщает: ').pop().split(' играет за ');
+			
+			let provaNick = prov[0];
+			
+			let provaRole = prov[1];
+			
+			let provaId = userList(1, provaNick);
+			
+			if (provaId) {
+				
+				setTimeout(() => gam_data['v_mode'] ? runBot(1, provaId, provaNick, provaRole) : false, 3000);
+				
+			}
+			
+		});
+	
+	}
+
+}
+
+let readUserList = () => {
+	
+	let urlList = $('#upl_list li .ico[title!=""]').not('.idead').parent();
+	
+	let questsEnd;
+	
+	if (urlList.length){
+		
+		urlList.each((n, person) => {
+			
+			let personId = parseInt($(person).attr('id').replace(/\D+/g,""));
+			
+			if (personId == my_id) return true;
+			
+			let roleId = parseInt($(person).find('.ico').attr('label'));
+			
+			//console.info(roleId, pla_data['person']);
+			
+			//if (!__team_by_person(roleId)) {
+				
+				for (let key in personSquad) {
+					
+					//console.info(personSquad[key].includes(roleId), personSquad[key].includes(pla_data['person']));
+					
+					if (personSquad[key].includes(roleId) && !personSquad[key].includes(pla_data['person'])) {
+						
+						prigUsers[personId] = 1;
+						
+						if (roleId == 3 && taroMan) {
+							
+							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
+						
+							if (questsEnd) {
+							
+								questsFinish[73] = 1;
+							
+							}				
+							
+						}
+						
+						if ([2, 9, 25, 47].includes(roleId) && taroMaf) {
+							
+							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
+						
+							if (questsEnd) {
+							
+								questsFinish[72] = 1;
+							
+							}							
+							
+						}
+						
+						setTimeout(() => gam_data['v_mode'] ? runBot(3, personId) : false, 3000);
+						
+						return false;
+						
+					}
+
+				}
+				
+			//}
+			
+		});
+	
+	}
+
+}
+
+let judgment = () => {
+
+	prigUsers[pla_data['kvt']] ? _GM_action('', 'vote', 2, [pla_data['kvt'], 0]) : _GM_action('', 'vote', 1, [pla_data['kvt'], 0]);
+
+}
+
+let nightRun = () => {
+
+	
+
+}
+
+let userList = (param, value) => {
+	
+	let result = 0;
+	
+	let urlList = $('#upl_list li .ico').not('.idead').parent();
+	
+	urlList.each((n, line) => {
+	
+		switch (param) {
+			
+			/**********ID игрока**********/
+			
+			case 1:
+				
+				if ($(line).find('.nick').text() == value){
+					
+					result = line.id.replace(/\D+/g, "");
+					
+					return false;
+					
+				}
+			
+				break;
+		}
+	
+	});
+	
+	return result;
+	
+}
 
 const startTimer = () => {
 	
