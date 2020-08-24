@@ -52,7 +52,7 @@ let questExtCount = {
 	
 	70: [170, 3], 
 	
-	67: [157, 3], 
+	67: [157, 5], 
 	
 	66: [156, 3], 
 	
@@ -66,11 +66,11 @@ let questExtCount = {
 	
 	58: [106, 3],
 	
-	55: [103, 3],
+	55: [103, 5],
 	
 	54: [104, 3],
 	
-	52: [101, 3],
+	52: [101, 5],
 	
 } 
 
@@ -356,6 +356,12 @@ let my__style = '\
 			margin-left: 18px;\
 			float: right;\
 		}\
+		.input__test {\
+			width: 111px;\
+			text-align: center;\
+			margin-left: 28px;\
+			margin-top: 15px;\
+		}\
 	</style>\
 ';
 
@@ -386,7 +392,7 @@ const writeLocalStorage = (section, elementId, block) => {
 				for (let i = 0; i < 2; i++) {
 
 					let index = elementsLS[i].indexOf(elementId);
-
+					
 					if (index > -1) {
 
 						elementsLS[i].splice(index, 1);
@@ -410,6 +416,8 @@ const writeLocalStorage = (section, elementId, block) => {
 				elementsLS = elementId;
 				
 			}
+			
+			listQuests = elementsLS;
 
 			break;
 			
@@ -548,9 +556,12 @@ $.each(['bronze', 'gold', 'brilliant'], (index, value) => {
 
 });	
 
+let testTags = (my_id == 10901047) ? '<input class="input__test" type="text" value="">' : '';
+
 let my__tags = '<!--Теги-->\
-	<div id="chris__menu" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">\
-		<a href="#" hidefocus="true" class="popupClose"></a>\
+	<div id="chris__menu" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">'
+		+ testTags +
+		'<a href="#" hidefocus="true" class="popupClose"></a>\
 		<button class="bossButton menu__button cssGreenButton2 b__setting" hidefocus="true">Настройки</button>\
 		<button class="bossButton menu__button cssGreenButton2 b__start" hidefocus="true">Старт</button>\
 		<div class="gav__gav__gav">\
@@ -782,7 +793,7 @@ const randomPlayer = (userList) => {
 	
 		userId = playersRoom.eq(randomNum).attr("id").replace(/\D+/g, "");
 		
-	} catch(e) {}
+	} catch(error) {}
 
 	return userId;
 }
@@ -813,7 +824,7 @@ const botExit = (questsArr) => {
 		
 			if (!activeTasks[i] || questsFinish[value]) return true;
 
-			if (questsPriority.includes(value) || (activeTasks[i] == 2 && value != 62) {
+			if (questsPriority.includes(value) || (activeTasks[i] == 2 && value != 62)) {
 			
 				exit = false;
 
@@ -821,7 +832,7 @@ const botExit = (questsArr) => {
 		
 		});
 
-		if (exit) {
+		if (exit || pla_data['dead'] || $('#pp_fin').length) {
 		
 			_DLG('exit', 2, event);
 			
@@ -833,7 +844,7 @@ const botExit = (questsArr) => {
 
 };
 
-const EnterTheRoom = async (uCount) => { 
+const EnterTheRoom = async (uCount, uLeague) => { 
 
 	/**********Поиск комнат и вход**********/
 	
@@ -859,9 +870,9 @@ const EnterTheRoom = async (uCount) => {
 
 					let delta = row[3] - row[7];
 					
-					if (uCount > 8) {
+					if (!uLeague) {
 						
-						if (row[3] == uCount && row[4] <= leagueEntry && delta > 0 && row[5] == "20") {
+						if (row[3] == uCount && row[4] <= leagueEntry && delta < 5 && delta > 0 && row[5] == "20") {
 
 							_GM_action('gml', 'join', row[0], event);
 
@@ -1047,7 +1058,7 @@ const rewardActualQuests = async () => {
 
 						});
 						
-					} catch (e) {}
+					} catch (error) {}
 
 					resolve([my_quests, my_quests_limit]);
 
@@ -1061,15 +1072,27 @@ const rewardActualQuests = async () => {
 		
 		//console.info(result[0], result[1]);
 		
-		if (result[0].length) {
+		if (result[0].length && !$('.input__test').val()) {
 		
 			runQuests(result[0], result[1]);
 			
 		}
+
+		if ($('.input__test').val()) {
+			
+			let my_quests = [];
+
+			let testArr = $('.input__test').val().split(',');
+
+			$.each(testArr, (index, value) => {
+
+				my_quests.push(parseInt(value));
+
+			});
 		
-		//runQuests([7, 50, 65], [0, 4, 4]);
-		
-		//rewardActualQuests();
+			runQuests(my_quests, [0, 0, 0]);
+			
+		}
 		
 	}
 	
@@ -1217,7 +1240,9 @@ const runQuests = (my_quests, my_quests_limit) => {
 				
 				let usersCountRoom = 8;
 				
-				let priorityUsersCountRoom = 0;
+				let priorityUsersCountRoom = 8;
+				
+				let uLeague = 0;
 				
 				let allowRoom = true;
 				
@@ -1234,7 +1259,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 							case 7: 
 							
 								if (activeTasks[i] == 2){
-								
+									
 									priorityUsersCountRoom = 12;
 								
 								}
@@ -1264,6 +1289,14 @@ const runQuests = (my_quests, my_quests_limit) => {
 								}
 							
 								usersCountRoom = 20;
+							
+								break;
+								
+							case 10:
+							
+							case 41: 
+
+								uLeague = leagueEntry;
 							
 								break;
 							
@@ -1333,13 +1366,13 @@ const runQuests = (my_quests, my_quests_limit) => {
 
 					});
 					
-					if (priorityUsersCountRoom != usersCountRoom && priorityUsersCountRoom) {
+					if (priorityUsersCountRoom != usersCountRoom && priorityUsersCountRoom > 8) {
 					
 						usersCountRoom = priorityUsersCountRoom;
 					
 					}
 					
-					EnterTheRoom(usersCountRoom);
+					EnterTheRoom(usersCountRoom, uLeague);
 					
 				}
 				
@@ -1723,7 +1756,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							if (gam_data['v_mode']) {
 								
-								vote(randomPlayer());
+								vote(randomPlayer($('#upl_list li .ico[title=""]').not('.idead').parent()));
 
 								questsEnd = (parseInt($('#gxt_103').not('.disabled').find('.count').text())) ? useExtra([103]) : true;
 								
@@ -2173,35 +2206,43 @@ const readExtraResult = () => {
 	
 			if (extraTextProva[extraId]) {
 				
-				let prov;
+				try {
 				
-				switch (extraId) {
+					let prov;
 					
-					case 155:
-					
-					case 239:
-					
-						prov = $(prova).text().replace(extraTextProva[extraId], '').split(' - ');
-					
-						break;
+					switch (extraId) {
 						
-					default:
-					
-						prov = $(prova).text().split(extraTextProva[extraId]).pop().split(' - ');
-					
-						break;
+						case 155:
 						
-				}
-			
-				let provaNick = prov[0];
+						case 239:
+						
+							prov = $(prova).text().replace(extraTextProva[extraId], '').split(' - ');
+						
+							break;
+							
+						default:
+						
+							prov = $(prova).text().split(extraTextProva[extraId]).pop().split(' - ');
+						
+							break;
+							
+					}
 				
-				let provaRole = prov[1].replace('Рассказать ', '');
+					let provaNick = prov[0];
+					
+					let provaRole = prov[1].replace('Рассказать ', '');
 
-				let provaId = userList(1, provaNick);
-				
-				if (provaId && !pla_data['kvt']) {
+					let provaId = userList(1, provaNick);
 					
-					setTimeout(() => gam_data['v_mode'] ? runBot(2, provaId, provaNick, provaRole) : false, 3000);
+					if (provaId && !pla_data['kvt']) {
+						
+						setTimeout(() => gam_data['v_mode'] ? runBot(2, provaId, provaNick, provaRole) : false, 3000);
+						
+					}
+				
+				} catch(error) {
+					
+					console.info($(prova).text(), extraTextProva[extraId]);
 					
 				}
 			
