@@ -459,6 +459,14 @@ const removeLocalStorage = (key) => {
  
 //removeLocalStorage("quests");
 
+let userProfile = readLocalStorage("profile");
+
+if (!userProfile) {
+	
+	userProfile = 1;
+	
+}
+
 let listQuests = readLocalStorage("quests");
 
 let botStart = readLocalStorage("start");
