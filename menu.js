@@ -24,7 +24,7 @@ let countSendMega = 0;
 
 let questKiller = false;
 
-let userKiller;
+let userKiller = '';
 
 let taroMan = 0;
 
@@ -35,6 +35,8 @@ let auctionRolesSuik = {4: 42, 6: 43, 10: 44, 11: 44, 12: 45, 9: 46, 25: 47, 3: 
 let auctionRolesWin = {4: 13, 6: 14, 10: 15, 11: 15, 12: 16, 9: 18, 25: 19, 3: 20}
 
 let questsFinish = {};
+
+let questsPriority = [52, 54, 60, 65, 66, 70, 71, 74, 75, 76];
 
 let questExtCount = { 
 
@@ -375,11 +377,11 @@ const writeLocalStorage = (section, elementId, block) => {
 
 	let elementsLS = readLocalStorage(section);
 
-	switch (section){
+	switch (section) {
 
 		case "quests":
 		
-			if (elementsLS){
+			if (elementsLS) {
 
 				for (let i = 0; i < 2; i++) {
 
@@ -397,7 +399,7 @@ const writeLocalStorage = (section, elementId, block) => {
 
 					elementsLS[block].push(parseInt(elementId));
 					
-				} catch (error){
+				} catch (error) {
 					
 					elementsLS[parseInt($('#card' + block).parent().attr("id").replace(/\D+/g,""))].push(parseInt(elementId));
 					
@@ -463,7 +465,7 @@ let extBuy = readLocalStorage("ext__buy") ? true : false;
 
 let questsCheckbox = readLocalStorage("quests__checkbox");
 
-if (!listQuests){
+if (!listQuests) {
 
 	listQuests = {
 		
@@ -490,7 +492,7 @@ if (!questsCheckbox) {
 	writeLocalStorage('quests__checkbox', questsCheckbox);
 }
 
-if (!activeTasks){
+if (!activeTasks) {
 	
 	activeTasks = [1, 1, 1];
 
@@ -624,7 +626,7 @@ $(".b__start").click(e => {
 
 	/**********Нажатие кнопок Старт и Стоп**********/
 
-	if ($(e.target).text() == 'Старт'){
+	if ($(e.target).text() == 'Старт') {
 
 		$(e.target).text('Стоп');
 
@@ -718,7 +720,7 @@ const spouse = () => {
 
 		success: (data) => {
 	
-			if (data.arr[10][0]){
+			if (data.arr[10][0]) {
 
 				giftsSendTo = data.arr[10][0];
 	
@@ -780,7 +782,7 @@ const randomPlayer = (userList) => {
 	
 		userId = playersRoom.eq(randomNum).attr("id").replace(/\D+/g, "");
 		
-	} catch(e){}
+	} catch(e) {}
 
 	return userId;
 }
@@ -801,11 +803,29 @@ const talk = (text) => {
 
 /**********Выход**********/
 
-const botExit = () => {
+const botExit = (questsArr) => {
 
 	if (!questKiller) {
+	
+		let exit = true;
 
-		_DLG('exit', 2, event);
+		$.each(questsArr, (i, value) => {
+		
+			if (!activeTasks[i] || questsFinish[value]) return true;
+
+			if (questsPriority.includes(value) || (activeTasks[i] == 2 && value != 62) {
+			
+				exit = false;
+
+			}
+		
+		});
+
+		if (exit) {
+		
+			_DLG('exit', 2, event);
+			
+		}
 
 		//say = false;
 		
@@ -833,7 +853,7 @@ const EnterTheRoom = async (uCount) => {
 
 		success: (data) => {
 
-			if (typeof data.gml != "undefined"){
+			if (typeof data.gml != "undefined") {
 
 				$.each(data.gml, (i, row) => {
 
@@ -841,7 +861,7 @@ const EnterTheRoom = async (uCount) => {
 					
 					if (uCount > 8) {
 						
-						if (row[3] == uCount && row[4] <= leagueEntry && delta > 0 && row[5] == "20"){
+						if (row[3] == uCount && row[4] <= leagueEntry && delta > 0 && row[5] == "20") {
 
 							_GM_action('gml', 'join', row[0], event);
 
@@ -849,7 +869,7 @@ const EnterTheRoom = async (uCount) => {
 						
 					} else {
 
-						if (row[3] == uCount && row[4] == leagueEntry && delta < 5 && delta > 0 && row[5] == "20"){
+						if (row[3] == uCount && row[4] == leagueEntry && delta < 5 && delta > 0 && row[5] == "20") {
 
 							_GM_action('gml', 'join', row[0], event);
 
@@ -895,7 +915,7 @@ const dropIt = (e) => {
 
 	let sourceIdParentEl = sourceIdEl.parentElement;
 	
-	if (!e.target.id){
+	if (!e.target.id) {
 		
 		e.target.id = $(e.target).parents()[2].id;
 		
@@ -909,13 +929,13 @@ const dropIt = (e) => {
 
 	writeLocalStorage('quests', idQuest, idContainer);
 
-	if (targetEl){
+	if (targetEl) {
 
 		let targetParentEl = targetEl.parentElement;
 
-		if (targetParentEl.id !== sourceIdParentEl.id){
+		if (targetParentEl.id !== sourceIdParentEl.id) {
 
-			if (targetEl.className === sourceIdEl.className ){
+			if (targetEl.className === sourceIdEl.className ) {
 
 				targetParentEl.appendChild(sourceIdEl);
 
@@ -1175,11 +1195,11 @@ const runQuests = (my_quests, my_quests_limit) => {
 
 			$.each(my_quests, (i, quest) => {
 				
-				if (!startChangeTask){
+				if (!startChangeTask) {
 				
 					if (!activeTasks[i]) return true;
 					
-					if (!questsCheckbox[quest][i]){
+					if (!questsCheckbox[quest][i]) {
 						
 						startChangeTask = true;
 						
@@ -1193,9 +1213,11 @@ const runQuests = (my_quests, my_quests_limit) => {
 				
 			});
 			
-			if (!startChangeTask){
+			if (!startChangeTask) {
 				
 				let usersCountRoom = 8;
+				
+				let priorityUsersCountRoom = 0;
 				
 				let allowRoom = true;
 				
@@ -1205,23 +1227,41 @@ const runQuests = (my_quests, my_quests_limit) => {
 					
 					if (!activeTasks[i]) return true;
 					
-					if (__dqs[quest].limits[i] > my_quests_limit[i]){
+					if (__dqs[quest].limits[i] > my_quests_limit[i]) {
 				
 						switch (quest) {
 							
 							case 7: 
 							
+								if (activeTasks[i] == 2){
+								
+									priorityUsersCountRoom = 12;
+								
+								}
+
 								usersCountRoom = 12;
 							
 								break;
 								
-							case 8: 
+							case 8:
+							
+								if (activeTasks[i] == 2){
+								
+									priorityUsersCountRoom = 16;
+								
+								}
 							
 								usersCountRoom = 16;
 							
 								break;
 								
 							case 9: 
+
+								if (activeTasks[i] == 2){
+								
+									priorityUsersCountRoom = 20;
+								
+								}
 							
 								usersCountRoom = 20;
 							
@@ -1292,6 +1332,12 @@ const runQuests = (my_quests, my_quests_limit) => {
 						myExtraCount[parseInt($(val).attr('id').replace(/\D+/g, ''))] = parseInt($(val).find('span').text());
 
 					});
+					
+					if (priorityUsersCountRoom != usersCountRoom && priorityUsersCountRoom) {
+					
+						usersCountRoom = priorityUsersCountRoom;
+					
+					}
 					
 					EnterTheRoom(usersCountRoom);
 					
@@ -1405,9 +1451,9 @@ const runQuests = (my_quests, my_quests_limit) => {
 					
 			});
 				
-			if ($('#auctionPopup').length){
+			if ($('#auctionPopup').length) {
 				
-				if (my_quests.includes(auctionRolesSuik[gam_data['sale_p']]) || my_quests.includes(49)){
+				if (my_quests.includes(auctionRolesSuik[gam_data['sale_p']]) || my_quests.includes(49)) {
 
 					if (rolesRuby && parseInt($('.rubyBalance').text())) {
 						
@@ -1419,7 +1465,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 					}
 
-				} else if (my_quests.includes(auctionRolesWin[gam_data['sale_p']])){
+				} else if (my_quests.includes(auctionRolesWin[gam_data['sale_p']])) {
 					
 					if (rolesRuby && parseInt($('.rubyBalance').text())) {
 
@@ -1431,7 +1477,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 					}
 					
-				} else if (my_quests.includes(50) && gam_data['sale_b'] < 20){
+				} else if (my_quests.includes(50) && gam_data['sale_b'] < 20) {
 					
 					_GM_action('', 'sale_bet', 0);
 
@@ -1651,7 +1697,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Жучок**********/
 						
-							if (!gam_data['v_mode']){
+							if (!gam_data['v_mode']) {
 						
 								questsEnd = (parseInt($('#gxt_101').not('.disabled').find('.count').text())) ? useExtra([101]) : true;
 								
@@ -1675,7 +1721,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Двойной голос**********/
 						
-							if (gam_data['v_mode']){
+							if (gam_data['v_mode']) {
 								
 								vote(randomPlayer());
 
@@ -1709,7 +1755,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Психоз**********/
 						
-							if (gam_data['v_mode']){
+							if (gam_data['v_mode']) {
 								
 								questsEnd = (parseInt($('#gxt_114').not('.disabled').find('.count').text())) ? useExtra([114]) : true;
 								
@@ -1731,22 +1777,41 @@ const runQuests = (my_quests, my_quests_limit) => {
 								
 								userKiller = $('#upl_list li .ico[title=""]').not('.idead').parent();
 								
-								questKiller = true;
+								questKiller = true;								
 								
-								_DLG('exit', 2, event);
+								$.each(my_quests, (i, value) => {
 								
-								//setTimeout(() => !pla_data['dead'] ? _DLG('exit', 2, event) : false, 5000);
+									if (!activeTasks[i] || questsFinish[value]) return true;
+
+									if (questsPriority.includes(value)) {
+									
+										questKiller = false;
+										
+									}
+								
+								});
+								
+								if (questKiller) {
+
+									_DLG('exit', 2, event);
+									
+								}
+
 								
 							}
-
-							questsEnd = (parseInt($('#gxt_115').not('.disabled').find('.count').text())) ? useExtra([115], userKiller) : true;
 							
-							if (questsEnd) {
+							if (questKiller) {
+
+								questsEnd = (parseInt($('#gxt_115').not('.disabled').find('.count').text())) ? useExtra([115], userKiller) : true;
 								
-								questsFinish[quest] = 1;
-								
-								_DLG('exit', 2, event);
-								
+								if (questsEnd) {
+									
+									questsFinish[quest] = 1;
+									
+									_DLG('exit', 2, event);
+									
+								}
+							
 							}
 
 							break;
@@ -1783,7 +1848,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Бюрократ**********/
 						
-							if (gam_data['v_mode']){
+							if (gam_data['v_mode']) {
 
 								questsEnd = (parseInt($('#gxt_157').not('.disabled').find('.count').text())) ? useExtra([157]) : true;
 								
@@ -1795,7 +1860,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Таблетки**********/
 						
-							if (!gam_data['v_mode']){
+							if (!gam_data['v_mode']) {
 
 								questsEnd = (parseInt($('#gxt_170').not('.disabled').find('.count').text())) ? useExtra([170]) : true;
 							
@@ -1964,7 +2029,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 					
 					if (questsFinish[quest] && activeTasks[i] == 2 && listQuests[1].includes(quest)) {
 						
-						botExit();
+						botExit(my_quests);
 						
 					}
 				
@@ -1984,43 +2049,33 @@ const runQuests = (my_quests, my_quests_limit) => {
 
 			});
 			
-			let suikExit = 0;
+			let suikExit = 1;
+			
+			let optionSuikYes = 0;
 			
 			for (var q in questsFinish) {
 				
 				q = parseInt(q);
 
-				if (!suikExit && questsFinish[q] && listQuests[1].includes(q)) {
-					
-					suikExit = 1;
-					
-				}
-				
-			}
-			
-			let i = 0;
-			
-			for (var q in questsFinish) {
-				
-				q = parseInt(q);
+				if (!questsFinish[q]) {
 
-				if (suikExit && !questsFinish[q] && activeTasks[i] == 2) {
-					
 					suikExit = 0;
 					
 				}
 				
-				i++;
+				if (listQuests[1].includes(q)) {
 				
-			}	
-			
-			suikExit = 0;
+					optionSuikYes = 1;
+				
+				}
+				
+			}
 			
 			//console.info('suik', suikExit);
 			
-			if ($('.my.idead').length || $('#pp_fin').length || suikExit){
+			if ($('.my.idead').length || $('#pp_fin').length || (suikExit && optionSuikYes)) {
 
-				botExit();
+				botExit(my_quests);
 
 			}
 			
@@ -2042,7 +2097,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 
 		case 'fin':
 
-			botExit();
+			botExit(my_quests);
 
 			break;
 
@@ -2054,9 +2109,9 @@ spouse();
 
 discount();
 
-let readSMS = () => {
+const readSMS = () => {
 	
-	if ($('#cco_log p').length){
+	if ($('#cco_log p').length) {
 
 		$('#cco_log p').each((n, sms) => {
 			
@@ -2108,15 +2163,15 @@ let readSMS = () => {
 	
 }
 
-let readExtraResult = () => {
+const readExtraResult = () => {
 
-	if ($('#cco_log .extra .text').length){
+	if ($('#cco_log .extra .text').length) {
 	
 		$('#cco_log .extra .text').each((n, prova) => {
 			
 			let extraId = parseInt($(prova).parent().find('img').attr('src').replace(/\D+/g,""));
 	
-			if (extraTextProva[extraId]){
+			if (extraTextProva[extraId]) {
 				
 				let prov;
 				
@@ -2158,7 +2213,7 @@ let readExtraResult = () => {
 	
 }
 
-let runBot = (param, id, nick, role) => {
+const runBot = (param, id, nick, role) => {
 	
 	//console.info(param, id, nick, role);
 	
@@ -2370,9 +2425,9 @@ let runBot = (param, id, nick, role) => {
 	
 }
 
-let readProva = () => {
+const readProva = () => {
 	
-	if ($('#cco_log .proverka').length){
+	if ($('#cco_log .proverka').length) {
 	
 		$('#cco_log .proverka').each((n, prova) => {
 			
@@ -2396,13 +2451,13 @@ let readProva = () => {
 
 }
 
-let readUserList = () => {
+const readUserList = () => {
 	
 	let urlList = $('#upl_list li .ico[title!=""]').not('.idead').parent();
 	
 	let questsEnd;
 	
-	if (urlList.length){
+	if (urlList.length) {
 		
 		urlList.each((n, person) => {
 			
@@ -2464,19 +2519,19 @@ let readUserList = () => {
 
 }
 
-let judgment = () => {
+const judgment = () => {
 
 	prigUsers[pla_data['kvt']] ? _GM_action('', 'vote', 2, [pla_data['kvt'], 0]) : _GM_action('', 'vote', 1, [pla_data['kvt'], 0]);
 
 }
 
-let nightRun = () => {
+const nightRun = () => {
 
 	
 
 }
 
-let userList = (param, value) => {
+const userList = (param, value) => {
 	
 	let result = 0;
 	
@@ -2490,7 +2545,7 @@ let userList = (param, value) => {
 			
 			case 1:
 				
-				if ($(line).find('.nick').text() == value){
+				if ($(line).find('.nick').text() == value) {
 					
 					result = line.id.replace(/\D+/g, "");
 					
@@ -2508,7 +2563,7 @@ let userList = (param, value) => {
 }
 
 const startTimer = () => {
-	
+
 	if (botStart) {
 		
 		rewardActualQuests();
