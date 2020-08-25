@@ -2,6 +2,8 @@
 
 let urlKey = '/standalone/' + _MBK.toString().split('/')[2] + '/DO/';
 
+let userProfiles = {};
+
 let speedSetInterval = 500;
 
 let giftsSendTo = 10901047;
@@ -72,7 +74,7 @@ let questExtCount = {
 	
 	52: [101, 5],
 	
-} 
+};
 
 let myExtraCount = {};
 
@@ -126,7 +128,7 @@ let personSquad = {
 	
 	12: [3]
 	
-}
+};
 
 let extraTextProva = {
 		
@@ -212,7 +214,7 @@ let my__style = '\
 		.board__text {\
 			font-weight: bold;\
 			font-size: 20px;\
-			margin-top: -15px;\
+			margin-top: -10px;\
 		}\
 		.board__lists {\
 			display: grid;\
@@ -363,6 +365,18 @@ let my__style = '\
 			margin-left: 28px;\
 			margin-top: 15px;\
 		}\
+		.profile__button {\
+			border: 1px solid gray;\
+			padding: 2px;\
+		}\
+		.profile__button:hover {\
+			border: 1px solid red;\
+			background-color: darkmagenta;\
+			color: white;\
+		}\
+		.name__profile {\
+			margin-left: 8px;\
+		}\
 	</style>\
 ';
 
@@ -370,7 +384,7 @@ const readLocalStorage = (key) => {
 
 	/**********Получение значения по ключу из локального хранилища**********/
 	
-	key = (key != 'profile') ? key + '_' + my_id + '_' + userSelectedProfile : key + '_' + my_id;
+	key = (key != 'profile' && key != 'user__profiles') ? key + '_' + my_id + '_' + userSelectedProfile : key + '_' + my_id;
 
 	let resultLS = JSON.parse(localStorage.getItem(key));
 
@@ -434,13 +448,17 @@ const writeLocalStorage = (section, elementId, block) => {
 
 		case "quests__checkbox":
 		
+		case "profile":
+		
+		case "user__profiles":
+		
 				elementsLS = elementId;
 		
 			break;
 
 	}
 
-	section = (section != 'profile') ? section + '_' + my_id + '_' + userSelectedProfile : section + '_' + my_id;	
+	section = (section != 'profile' && section != 'user__profiles') ? section + '_' + my_id + '_' + userSelectedProfile : section + '_' + my_id;	
 
 	localStorage.setItem(section, JSON.stringify(elementsLS));
 
@@ -575,6 +593,20 @@ $.each(['bronze', 'gold', 'brilliant'], (index, value) => {
 
 let testTags = (my_id == 10901047) ? '<input class="input__test" type="text" value="">' : '';
 
+userProfiles = readLocalStorage('user__profiles') || {};
+
+let htmlProfiles = '<select class="bot__profile"><option value="1">Новый профиль</option>';
+
+for (var q in userProfiles) {
+	
+	q = parseInt(q);
+	
+	htmlProfiles += '<option value="' + q + '">' + userProfiles[q]['name'] + '</option>';
+	
+}
+
+htmlProfiles += '</select>';
+
 let my__tags = '<!--Теги-->\
 	<div id="chris__menu" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">'
 		+ testTags +
@@ -591,7 +623,11 @@ let my__tags = '<!--Теги-->\
 		<a href="#" hidefocus="true" class="popupClose"></a>\
 		<div class="board__layout">\
 			<div class="left">\
-				<div class="board__text">Настройки квестов</div>\
+				<div class="board__text">'
+					+ htmlProfiles +
+					'<input type="text" class="name__profile" placeholder="Введите название">\
+					<button class="profile__button b__save">Сохранить</button>\
+				</div>\
 				<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
 				<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
 				<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр'
@@ -727,6 +763,68 @@ $(".block__checkbox [type=checkbox]").change(e => {
 	writeLocalStorage('quests__checkbox', questsCheckbox);
 
 });
+
+$(".bot__profile").change(e => {
+
+	/**********Событие на select профиля**********/
+	
+	if (parseInt(e.target.value) > 1) {
+		
+		userSelectedProfile = parseInt(e.target.value);
+		
+		$('.name__profile').val($(e.target).find('option:selected').text());
+		
+	} else {
+		
+		$('.name__profile').val('');
+		
+		userSelectedProfile = 1;
+		
+	}
+	
+	writeLocalStorage('profile', userSelectedProfile);
+	
+	//функци обновления настроек
+
+});
+
+$(".b__save").click(e => {
+
+	/**********Событие на сохранение профиля**********/
+	
+	userProfiles = readLocalStorage('user__profiles') || {};
+	
+	let key = parseInt($('.bot__profile').val());
+	
+	if (key == 1) {
+		
+		let key = parseInt(Object.keys(userProfiles).pop()) + 1;
+		
+	}
+	
+	userProfiles[key] = userProfiles[key] || {};
+	
+	userProfiles[key]['name'] = $('.name__profile').val();
+	
+	//console.info(key, userProfiles[key]);
+	
+	/**userProfiles[key]['active__tasks'] = activeTasks;
+	
+	userProfiles[key]['auk__ruby'] = rolesRuby;
+	
+	userProfiles[key]['change__quests'] = questsRuby;
+	
+	userProfiles[key]['ext__buy'] = extBuy;
+	
+	userProfiles[key]['quests__checkbox'] = questsCheckbox;
+	
+	userProfiles[key]['quests'] = listQuests;**/
+	
+	writeLocalStorage('user__profiles', userProfiles);
+
+});
+
+
 
 const spouse = () => { 
 
