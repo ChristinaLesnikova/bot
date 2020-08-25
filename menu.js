@@ -163,6 +163,7 @@ let extraTextProva = {
 let prigUsers = {};
 
 /**********Стили меню**********/
+
 let my__style = '\
 	<style>\
 		#chris__menu {\
@@ -369,7 +370,7 @@ const readLocalStorage = (key) => {
 
 	/**********Получение значения по ключу из локального хранилища**********/
 	
-	key = key + '_' + my_id;
+	key = (key != 'profile') ? key + '_' + my_id + '_' + userSelectedProfile : key + '_' + my_id;
 
 	let resultLS = JSON.parse(localStorage.getItem(key));
 
@@ -377,9 +378,9 @@ const readLocalStorage = (key) => {
 
 };
 
-const writeLocalStorage = (section, elementId, block) => { 
+const writeLocalStorage = (section, elementId, block) => {
 
-	/**********Записываем значение в локального хранилище**********/
+	/**********Записываем значение в локальное хранилище**********/
 
 	let elementsLS = readLocalStorage(section);
 
@@ -439,7 +440,7 @@ const writeLocalStorage = (section, elementId, block) => {
 
 	}
 
-	section = section + '_' + my_id;
+	section = (section != 'profile') ? section + '_' + my_id + '_' + userSelectedProfile : section + '_' + my_id;	
 
 	localStorage.setItem(section, JSON.stringify(elementsLS));
 
@@ -447,11 +448,17 @@ const writeLocalStorage = (section, elementId, block) => {
 
 };
 
-const removeLocalStorage = (key) => { 
+const removeLocalStorage = (key) => {
 
 	/**********Удаляем запись из локального хранилища**********/
 
 	localStorage.removeItem(key);
+	
+	if (key == 'all') {
+	
+		localStorage.clear();
+		
+	}
 	
 	return true;
 
@@ -459,12 +466,14 @@ const removeLocalStorage = (key) => {
  
 //removeLocalStorage("quests");
 
-let userProfile = readLocalStorage("profile");
+//removeLocalStorage("all");
 
-if (!userProfile) {
+let userSelectedProfile = readLocalStorage("profile");
+
+if (!userSelectedProfile) {
 	
-	userProfile = 1;
-	
+	userSelectedProfile = 1;
+
 }
 
 let listQuests = readLocalStorage("quests");
@@ -1078,8 +1087,6 @@ const rewardActualQuests = async () => {
 		
 		let result = await promise;
 		
-		//console.info(result[0], result[1]);
-		
 		if (result[0].length && !$('.input__test').val()) {
 		
 			runQuests(result[0], result[1]);
@@ -1217,8 +1224,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 			prigUsers = {};
 		
 			questsFinish = {};
-
-			//console.info(my_quests, my_quests_limit);
 			
 			userKiller = '';
 			
@@ -1255,8 +1260,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 				let allowRoom = true;
 				
 				$.each(my_quests, (i, quest) => {
-					
-					//console.info(activeTasks[i], my_quests_limit[i], __dqs[quest].limits[i], quest);
 					
 					if (!activeTasks[i]) return true;
 					
@@ -1308,8 +1311,8 @@ const runQuests = (my_quests, my_quests_limit) => {
 							
 								break;
 							
-							case 81: 
-							
+							case 81:
+
 								/**********Дарить ряды из обычных подарков**********/
 							
 								if (countSendGift < __dqs[quest].limits[i]) {
@@ -1477,8 +1480,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 						countExtra = countExtra ? parseInt(countExtra) : 0;
 						
 						if (countExtra < questExtCount[quest][1]) {
-							
-							//console.info(countExtra, questExtCount[quest][1]);
 
 							extraBuy(questExtCount[quest][0]);
 							
@@ -1531,8 +1532,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 		case 'game':
 		
 			$.each(my_quests, (i, quest) => {
-				
-				//console.info('tip', quest);
 				
 				if (!activeTasks[i] || questsFinish[quest]) return true;
 				
@@ -1661,8 +1660,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 							break;
 							
 						case 25:
-						
-							//console.info('tip2', quest);
 						
 							questsFinish[quest] = (pla_data['person'] != 2) ? 1 : 0;
 
@@ -2112,8 +2109,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 				
 			}
 			
-			//console.info('suik', suikExit);
-			
 			if ($('.my.idead').length || $('#pp_fin').length || (suikExit && optionSuikYes)) {
 
 				botExit(my_quests);
@@ -2263,8 +2258,6 @@ const readExtraResult = () => {
 }
 
 const runBot = (param, id, nick, role) => {
-	
-	//console.info(param, id, nick, role);
 	
 	let questsEnd;
 
@@ -2516,51 +2509,43 @@ const readUserList = () => {
 			
 			let roleId = parseInt($(person).find('.ico').attr('label'));
 			
-			//console.info(roleId, pla_data['person']);
+			for (let key in personSquad) {
 			
-			//if (!__team_by_person(roleId)) {
-				
-				for (let key in personSquad) {
+				if (personSquad[key].includes(roleId) && !personSquad[key].includes(pla_data['person'])) {
 					
-					//console.info(personSquad[key].includes(roleId), personSquad[key].includes(pla_data['person']));
+					prigUsers[personId] = 1;
 					
-					if (personSquad[key].includes(roleId) && !personSquad[key].includes(pla_data['person'])) {
+					if (roleId == 3 && taroMan) {
 						
-						prigUsers[personId] = 1;
+						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
+					
+						if (questsEnd) {
 						
-						if (roleId == 3 && taroMan) {
-							
-							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
+							questsFinish[73] = 1;
 						
-							if (questsEnd) {
-							
-								questsFinish[73] = 1;
-							
-							}				
-							
-						}
-						
-						if ([2, 9, 25, 47].includes(roleId) && taroMaf) {
-							
-							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
-						
-							if (questsEnd) {
-							
-								questsFinish[72] = 1;
-							
-							}							
-							
-						}
-						
-						setTimeout(() => gam_data['v_mode'] ? runBot(3, personId) : false, 3000);
-						
-						return false;
+						}				
 						
 					}
-
+					
+					if ([2, 9, 25, 47].includes(roleId) && taroMaf) {
+						
+						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
+					
+						if (questsEnd) {
+						
+							questsFinish[72] = 1;
+						
+						}							
+						
+					}
+					
+					setTimeout(() => gam_data['v_mode'] ? runBot(3, personId) : false, 3000);
+					
+					return false;
+					
 				}
-				
-			//}
+
+			}
 			
 		});
 	
