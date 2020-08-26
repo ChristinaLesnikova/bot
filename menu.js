@@ -369,7 +369,10 @@ let my__style = '\
 		}\
 		.profile__button {\
 			border: 1px solid gray;\
-			padding: 2px;\
+			padding: 3px;\
+			background-color: bisque;\
+			height: 19px;\
+			color: brown;\
 		}\
 		.profile__button:hover {\
 			border: 1px solid red;\
@@ -378,6 +381,15 @@ let my__style = '\
 		}\
 		.name__profile {\
 			margin-left: 8px;\
+			background-color: bisque;\
+			color: brown;\
+			border: 1px solid gray;\
+			height: 15px;\
+		}\
+		.bot__profile {\
+			background-color: bisque;\
+			color: brown;\
+			border: 1px solid gray;\
 		}\
 	</style>\
 ';
@@ -569,7 +581,7 @@ const loadProfileSettings = (param) => {
 
 		listQuests[key].forEach((item) => {
 
-			listItems += '<div id="card' + item + '" class="card mymenu" draggable="true" ondragstart="dragStart(event)" title="' + __dqs[item].text + '">' + 
+			listItems += '<div id="card' + item + '" class="card mymenu" draggable="true" ondragstart="dragStart(event)" title="' + __dqs[item].text.replace('%s', __dqs[item].limits.toString()) + '">' + 
 				__dqs[item].title +
 				'<div class="block__checkbox">\
 					<label class="checkbox__bronze">\
@@ -825,6 +837,8 @@ const loadProfileSettings = (param) => {
 		writeLocalStorage('user__profiles', userProfiles);
 		
 		userSelectedProfile = key;
+		
+		writeLocalStorage('profile', userSelectedProfile);
 		
 		loadProfileSettings();
 		
