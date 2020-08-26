@@ -386,7 +386,7 @@ const readLocalStorage = (key) => {
 
 	/**********Получение значения по ключу из локального хранилища**********/
 	
-	key = (key != 'profile' && key != 'user__profiles') ? key + '_' + my_id + '_' + userSelectedProfile : key + '_' + my_id;
+	key = (!['version', 'profile', 'user__profiles'].includes(key)) ? key + '_' + my_id + '_' + userSelectedProfile : key + '_' + my_id;
 
 	let resultLS = JSON.parse(localStorage.getItem(key));
 
@@ -454,13 +454,15 @@ const writeLocalStorage = (section, elementId, block) => {
 		
 		case "user__profiles":
 		
+		case "version":
+		
 				elementsLS = elementId;
 		
 			break;
 
 	}
 
-	section = (section != 'profile' && section != 'user__profiles') ? section + '_' + my_id + '_' + userSelectedProfile : section + '_' + my_id;	
+	section = (!['version', 'profile', 'user__profiles'].includes(section)) ? section + '_' + my_id + '_' + userSelectedProfile : section + '_' + my_id;	
 
 	localStorage.setItem(section, JSON.stringify(elementsLS));
 
@@ -483,12 +485,22 @@ const removeLocalStorage = (key) => {
 	return true;
 
 };
+
+let version = readLocalStorage("version");
+
+if (version != '1.01') {
+	
+	removeLocalStorage("all");
+	
+	writeLocalStorage('version', '1.01');
+	
+}
  
 //removeLocalStorage("quests");
 
 //removeLocalStorage("all");
 
-const loadProfileSettings = () => {
+const loadProfileSettings = (param) => {
 
 	userSelectedProfile = readLocalStorage("profile");
 
@@ -645,6 +657,8 @@ const loadProfileSettings = () => {
 	';
 	
 	$('#chris__menu').length ? $('#chris__menu').remove() : false;
+
+	$('#win__settings').length ? $('#win__settings').remove() : false;	
 	
 	$('#popup_container').append(my__tags);
 	
@@ -655,14 +669,188 @@ const loadProfileSettings = () => {
 	}
 
 	$('#chris__menu').draggable();
+	
+	$("#chris__menu .popupClose").click(e => {
+
+		/**********Закрытие окна меню**********/
+
+		$("#win__settings").hide(500);
+
+		$("#chris__menu").hide(500);
+
+	});
+
+	$("#win__settings .popupClose").click(e => { 
+
+		/**********Закрытие окна настроек**********/
+
+		$("#win__settings").hide(500);
+
+	});
+
+	$(".b__setting").click(e => {
+
+		/**********Открытие окна настроек**********/
+
+		$("#win__settings").css("display") == 'block' ? $("#win__settings").hide(500) : $("#win__settings").show(500);
+
+	});
+
+	$(".b__start").click(e => {
+
+		/**********Нажатие кнопок Старт и Стоп**********/
+
+		if ($(e.target).text() == 'Старт') {
+
+			$(e.target).text('Стоп');
+
+			botStart = true;
+
+			$("#chris__menu .popupClose").click();
+			
+		} else {
+
+			$(e.target).text('Старт');
+			
+			botStart = false;
+
+		}
+
+		writeLocalStorage('start', botStart);
+
+	});
+
+	$(".quest__color").change(e => {
+
+		/**********Событие на select по включению и отключению заданий**********/
+
+		activeTasks[color[e.target.className.split('__')[2]]] = parseInt(e.target.value);
+		
+		writeLocalStorage('active__tasks', activeTasks);
+
+	});
+
+	$("#auk__ruby").change(e => {
+
+		/**********Событие на чекбокс аукциона за рубины**********/
+
+		rolesRuby = e.target.checked;
+		
+		writeLocalStorage('auk__ruby', rolesRuby);
+
+	});
+
+	$("#change__quests").change(e => {
+
+		/**********Событие на чекбокс смены квестов за рубины**********/
+
+		questsRuby = e.target.checked;
+		
+		writeLocalStorage('change__quests', questsRuby);
+
+	});
+
+	$("#ext__buy").change(e => {
+
+		/**********Событие на чекбокс покупки экстр**********/
+
+		extBuy = e.target.checked;
+		
+		writeLocalStorage('ext__buy', extBuy);
+
+	});
+
+	$(".block__checkbox [type=checkbox]").change(e => {
+
+		/**********Событие на чекбокс квестов**********/
+
+		let cn = e.target.className.split('-');
+		
+		questsCheckbox[cn[0]][cn[1]] = e.target.checked ? 1 : 0;
+		
+		writeLocalStorage('quests__checkbox', questsCheckbox);
+
+	});
+
+	$(".bot__profile").change(e => {
+
+		/**********Событие на select профиля**********/
+		
+		console.info(parseInt(e.target.value));
+		
+		userSelectedProfile = (parseInt(e.target.value) > 1) ? parseInt(e.target.value) : 1;
+		
+		writeLocalStorage('profile', userSelectedProfile);
+		
+		loadProfileSettings();
+		
+		if (parseInt(e.target.value) > 1) {
+			
+			$('.name__profile').val($(e.target).find('option:selected').text());
+			
+		}
+		
+		//функци обновления настроек
+
+	});
+
+	$(".b__save").click(e => {
+
+		/**********Событие на сохранение профиля**********/
+		
+		userProfiles = readLocalStorage('user__profiles') || {};
+		
+		let key = parseInt($('.bot__profile').val());
+		
+		if (key == 1) {
+			
+			key = parseInt(Object.keys(userProfiles).pop()) + 1;
+			
+		}
+		
+		if (!key) {
+			
+			key = 2;
+			
+		}
+		
+		if ($('.name__profile').val() == '') {
+		
+			$('.name__profile').val('Профиль №' + key);
+		
+		}
+
+		userProfiles[key] = userProfiles[key] || {};
+		
+		userProfiles[key]['name'] = $('.name__profile').val();
+		
+		writeLocalStorage('user__profiles', userProfiles);
+		
+		userSelectedProfile = key;
+		
+		loadProfileSettings();
+		
+		if (userSelectedProfile > 1) {
+		
+			$('.name__profile').val($('.bot__profile option:selected').text());
+			
+		}
+
+	});
+	
+	if (!param) {
+	
+		$("#chris__menu").css("display") == 'block' ? $("#chris__menu").hide(100) : $("#chris__menu").show(100);
+	
+		$('.b__setting').click();
+		
+	}
 
 }
 
 $('#popup_container').append(my__style);
 
 $('.footerPanel').append('<li class="icon__heart"></li>');
-
-loadProfileSettings();
 
 $(".icon__heart").click(e => {
 
@@ -672,165 +860,7 @@ $(".icon__heart").click(e => {
 
 });
 
-$("#chris__menu .popupClose").click(e => {
-
-	/**********Закрытие окна меню**********/
-
-	$("#win__settings").hide(500);
-
-	$("#chris__menu").hide(500);
-
-});
-
-$("#win__settings .popupClose").click(e => { 
-
-	/**********Закрытие окна настроек**********/
-
-	$("#win__settings").hide(500);
-
-});
-
-$(".b__setting").click(e => {
-
-	/**********Открытие окна настроек**********/
-
-	$("#win__settings").css("display") == 'block' ? $("#win__settings").hide(500) : $("#win__settings").show(500);
-
-});
-
-$(".b__start").click(e => {
-
-	/**********Нажатие кнопок Старт и Стоп**********/
-
-	if ($(e.target).text() == 'Старт') {
-
-		$(e.target).text('Стоп');
-
-		botStart = true;
-
-		$("#chris__menu .popupClose").click();
-		
-	} else {
-
-		$(e.target).text('Старт');
-		
-		botStart = false;
-
-	}
-
-	writeLocalStorage('start', botStart);
-
-});
-
-$(".quest__color").change(e => {
-
-	/**********Событие на select по включению и отключению заданий**********/
-
-	activeTasks[color[e.target.className.split('__')[2]]] = parseInt(e.target.value);
-	
-	writeLocalStorage('active__tasks', activeTasks);
-
-});
-
-
-$("#auk__ruby").change(e => {
-
-	/**********Событие на чекбокс аукциона за рубины**********/
-
-	rolesRuby = e.target.checked;
-	
-	writeLocalStorage('auk__ruby', rolesRuby);
-
-});
-
-
-$("#change__quests").change(e => {
-
-	/**********Событие на чекбокс смены квестов за рубины**********/
-
-	questsRuby = e.target.checked;
-	
-	writeLocalStorage('change__quests', questsRuby);
-
-});
-
-$("#ext__buy").change(e => {
-
-	/**********Событие на чекбокс покупки экстр**********/
-
-	extBuy = e.target.checked;
-	
-	writeLocalStorage('ext__buy', extBuy);
-
-});
-
-$(".block__checkbox [type=checkbox]").change(e => {
-
-	/**********Событие на чекбокс квестов**********/
-
-	let cn = e.target.className.split('-');
-	
-	questsCheckbox[cn[0]][cn[1]] = e.target.checked ? 1 : 0;
-	
-	writeLocalStorage('quests__checkbox', questsCheckbox);
-
-});
-
-$(".bot__profile").change(e => {
-
-	/**********Событие на select профиля**********/
-	
-	if (parseInt(e.target.value) > 1) {
-		
-		userSelectedProfile = parseInt(e.target.value);
-		
-		$('.name__profile').val($(e.target).find('option:selected').text());
-		
-	} else {
-		
-		$('.name__profile').val('');
-		
-		userSelectedProfile = 1;
-		
-	}
-	
-	writeLocalStorage('profile', userSelectedProfile);
-	
-	loadProfileSettings();
-	
-	//функци обновления настроек
-
-});
-
-$(".b__save").click(e => {
-
-	/**********Событие на сохранение профиля**********/
-	
-	userProfiles = readLocalStorage('user__profiles') || {};
-	
-	let key = parseInt($('.bot__profile').val());
-	
-	if (key == 1) {
-		
-		key = parseInt(Object.keys(userProfiles).pop()) + 1;
-		
-	}
-	
-	if ($('.name__profile').val() == '') {
-	
-		$('.name__profile').val('Профиль №' + key);
-	
-	}
-
-	userProfiles[key] = userProfiles[key] || {};
-	
-	userProfiles[key]['name'] = $('.name__profile').val();
-	
-	writeLocalStorage('user__profiles', userProfiles);
-	
-	userSelectedProfile = key;
-
-});
+loadProfileSettings(1);
 
 const spouse = () => { 
 
