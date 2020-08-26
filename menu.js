@@ -776,8 +776,6 @@ const loadProfileSettings = (param) => {
 
 		/**********Событие на select профиля**********/
 		
-		console.info(parseInt(e.target.value));
-		
 		userSelectedProfile = (parseInt(e.target.value) > 1) ? parseInt(e.target.value) : 1;
 		
 		writeLocalStorage('profile', userSelectedProfile);
