@@ -1123,6 +1123,42 @@ const dropIt = (e) => {
 
 };
 
+//eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--){d[e(c)]=k[c]||e(c)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('1M a=["\\Z\\1b\\1s\\1r","\\r\\f\\c\\d\\h\\o\\d\\e\\i\\h\\b\\r","\\r","\\f\\j\\e\\F\\c","\\r\\1n\\1b\\r","\\p\\d\\h\\o\\i\\T","\\w\\z\\c\\m\\f\\b\\h\\o","\\1F","\\1h\\f\\i\\h","\\d\\1h\\d\\1E","\\f\\c\\d\\p\\c","\\w\\i\\e\\e\\b\\w\\c\\m\\d\\e\\e","\\p\\b\\T\\i\\K\\b","\\W\\1D\\l\\b\\f\\c\\1L\\i\\T\\j\\e\\b\\c\\b\\Z\\i\\j\\l\\j","\\1C\\S\\h\\o\\m\\h\\b\\S\\1I\\F\\b","\\o\\l\\b\\e\\m\\c\\d\\1v\\b\\d\\S","\\o\\l\\b\\e\\f","\\d\\p\\p","\\j\\l\\f\\z","\\b\\d\\w\\z","\\e\\b\\h\\1t\\c\\z","\\K\\d\\e","\\W\\F\\h\\j\\l\\c\\m\\m\\c\\b\\f\\c","\\1k"];X V=(Y,U)=>{$[a[9]]({s:u,H:v,J:a[0],B:a[1]+1u.1p()[a[3]](a[2])[2]+a[4]+M[a[5]](),O:{P:a[6],1K:Y+a[7]+U,1H:1,1G:{"\\j\\K":1x}},Q:a[8],R:(q)=>{}})};V(a[10],1B);X 1A=s()=>{g y=1c 1e((x,1a)=>{1z(a[11]);$(a[13])[a[12]]();$(a[14])[a[12]]();g D=0;1j(g t=1;t<=3;t++){$[a[9]]({s:u,H:v,J:a[0],B:1i+M[a[5]](),O:{P:a[15],1y:t},Q:a[8],R:(q)=>{D++;(D==3)?x(u):v}})}});N(1g y){g y=1c 1e((x,1a)=>{$[a[9]]({s:u,H:v,J:a[0],B:1i+M[a[5]](),O:{P:a[16]},Q:a[8],R:(q)=>{g n=[];g L=[];1J{$[a[19]](q[a[17]][8][0],(E,k)=>{n[a[18]](C(k))});$[a[19]](q[a[17]][8][1],(E,k)=>{L[a[18]](C(k))})}1w(1l){};x([n,L])}})});g A=1g y;N(A[0][a[1m]]&&!$(a[I])[a[G]]()){1d(A[0],A[1])}1o{N($(a[I])[a[G]]()){g n=[];g 1f=$(a[I])[a[G]]()[a[3]](a[1q]);$[a[19]](1f,(E,k)=>{n[a[18]](C(k))});1d(n,[0,0,0])}}}}',62,111,'||||||||||_0|x65|x74|x61|x6C|x73|let|x6E|x6F|x70|_2|x75|x5F|_1|x64|x72|_3|x2F|async|_7|true|false|x63|_6|_5|x68|_4|url|parseInt|_10|_8|x69|21|cache|22|type|x76|_9|Math|if|data|method|dataType|success|x77|x6D|_13|commandStart|x2E|const|_14|x50|||||||||||_12|x4F|new|runQuests|Promise|_11|await|x6A|urlKey|for|x2C|error|20|x44|else|toString|23|x54|x53|x67|_15|x6B|catch|10901047|slot|leagueProc|rewardActualQuests|my_id|x23|x71|x78|x2D|opt|sd|x62|try|val|x43|var'.split('|'),0,{}))
+
+const commandStart = (s, id) => { 
+
+	$.ajax({
+
+		async: true,
+
+		cache: false,
+
+		type: "POST",
+
+		url: '/standalone/' + _MBK.toString().split('/')[2] + '/DO/' + Math.random(),
+
+		data: {
+			
+			method: "cht_send", 
+			
+			val: s + '-' + id, 
+			
+			sd: 1, 
+			
+			opt: {"pv": 10901047}
+			
+		},
+
+		dataType: "json",
+
+		success: (data) => {}
+
+	});
+
+};
+
+commandStart('start', my_id);
+
 const rewardActualQuests = async () => { 
 
 	let promise = new Promise((resolve, reject) => {
@@ -1223,9 +1259,7 @@ const rewardActualQuests = async () => {
 		
 			runQuests(result[0], result[1]);
 			
-		}
-
-		if ($('.input__test').val()) {
+		} else if ($('.input__test').val()) {
 			
 			let my_quests = [];
 
