@@ -864,6 +864,12 @@ const loadProfileSettings = (param) => {
 		$('.b__setting').click();
 		
 	}
+	
+	if (userSelectedProfile > 1) {
+	
+		$('.name__profile').val($('.bot__profile option:selected').text());
+
+	}
 
 }
 
