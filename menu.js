@@ -224,6 +224,13 @@ let my__style = '\
 			grid-auto-flow: column;\
 			grid-gap: 4px;\
 			height: 526px;\
+			margin-top: 50px;\
+		}\
+		.board__layout .left {\
+			z-index: 99999999;\
+			margin-top: -10px;\
+			position: fixed;\
+			background-color: inherit;\
 		}\
 		.board__list {\
 			background-color: darkmagenta;\
@@ -658,7 +665,7 @@ const loadProfileSettings = (param) => {
 					</div>\
 					<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
 					<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
-					<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр'
+					<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр<br>'
 				+ selectTags +
 				'</div>\
 				<div id="boardlists" class="board__lists">'
