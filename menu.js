@@ -4,6 +4,8 @@ let urlKey = '/standalone/' + _MBK.toString().split('/')[2] + '/DO/';
 
 let userProfiles = {};
 
+let userSelectedProfile, listQuests, botStart, activeTasks, rolesRuby, questsRuby, extBuy, questsCheckbox;
+
 let speedSetInterval = 500;
 
 let giftsSendTo = 10901047;
@@ -486,173 +488,183 @@ const removeLocalStorage = (key) => {
 
 //removeLocalStorage("all");
 
-let userSelectedProfile = readLocalStorage("profile");
+const loadProfileSettings = () => {
 
-if (!userSelectedProfile) {
-	
-	userSelectedProfile = 1;
+	userSelectedProfile = readLocalStorage("profile");
 
-}
-
-let listQuests = readLocalStorage("quests");
-
-let botStart = readLocalStorage("start");
-
-let activeTasks = readLocalStorage("active__tasks");
-
-let rolesRuby = readLocalStorage("auk__ruby") ? true : false;
-
-let questsRuby = readLocalStorage("change__quests") ? true : false;
-
-let extBuy = readLocalStorage("ext__buy") ? true : false;
-
-let questsCheckbox = readLocalStorage("quests__checkbox");
-
-if (!listQuests) {
-
-	listQuests = {
+	if (!userSelectedProfile) {
 		
-		0: [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 41, 58, 73, 77, 79, 81], 
-		
-		1: [5, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 55, 60, 61, 62, 65, 66, 67, 70, 71, 72, 74, 75, 76]
-		
-	};
-
-	writeLocalStorage('quests', listQuests);
-
-}
-
-if (!questsCheckbox) {
-	
-	questsCheckbox = {};
-
-	for (let key in __dqs) {
-
-		questsCheckbox[parseInt(key)] = [1, 1, 1];
+		userSelectedProfile = 1;
 
 	}
+
+	listQuests = readLocalStorage("quests");
+
+	activeTasks = readLocalStorage("active__tasks");
+
+	rolesRuby = readLocalStorage("auk__ruby") ? true : false;
+
+	questsRuby = readLocalStorage("change__quests") ? true : false;
+
+	extBuy = readLocalStorage("ext__buy") ? true : false;
+
+	questsCheckbox = readLocalStorage("quests__checkbox");
 	
-	writeLocalStorage('quests__checkbox', questsCheckbox);
-}
-
-if (!activeTasks) {
+	botStart = readLocalStorage("start");
 	
-	activeTasks = [1, 1, 1];
+	if (!listQuests) {
 
-}
+		listQuests = {
+			
+			0: [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 41, 58, 73, 77, 79, 81], 
+			
+			1: [5, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 55, 60, 61, 62, 65, 66, 67, 70, 71, 72, 74, 75, 76]
+			
+		};
 
-let titleQuestsBlock = ['Без суика', 'С суиком'];
+		writeLocalStorage('quests', listQuests);
 
-let questsBlock = '';
+	}
 
-for (let key in listQuests) {
-	
-	key = parseInt(key);
+	if (!questsCheckbox) {
+		
+		questsCheckbox = {};
 
-	let listItems = '';
+		for (let key in __dqs) {
 
-	listQuests[key].forEach((item) => {
+			questsCheckbox[parseInt(key)] = [1, 1, 1];
 
-		listItems += '<div id="card' + item + '" class="card mymenu" draggable="true" ondragstart="dragStart(event)" title="' + __dqs[item].text + '">' + 
-			__dqs[item].title +
-			'<div class="block__checkbox">\
-				<label class="checkbox__bronze">\
-					<input class="' + item + '-0" type="checkbox"' + (questsCheckbox[item][0] ? ' checked' : '') + '>\
-					<span></span>\
-				</label>\
-				<label class="checkbox__gold">\
-					<input class="' + item + '-1" type="checkbox"' + (questsCheckbox[item][1] ? ' checked' : '') + '>\
-					<span></span>\
-				</label>\
-				<label class="checkbox__brilliant">\
-					<input class="' + item + '-2" type="checkbox"' + (questsCheckbox[item][2] ? ' checked' : '') + '>\
-					<span></span>\
-				</label>\
-			</div>\
-		</div>';
+		}
+		
+		writeLocalStorage('quests__checkbox', questsCheckbox);
+	}
 
-	});
-	
-	questsBlock += '<div id="list' + key + '" class="board__list" ondrop="dropIt(event)" ondragover="allowDrop(event)">\
-		<div class="list__title">' + titleQuestsBlock[key] + '</div>'
-		+ listItems +
-	'</div>'
-}
+	if (!activeTasks) {
+		
+		activeTasks = [1, 1, 1];
 
-let selectTags = '';
+	}
 
-$.each(['bronze', 'gold', 'brilliant'], (index, value) => {
-	
-	selectTags += '<select class="quest__color quest__' + value + '">\
-		<option value="0"' + (activeTasks[index] == 0 ? ' selected' : '') + '>Игнорировать</option>\
-		<option value="1"' + (activeTasks[index] == 1 ? ' selected' : '') + '>Играть</option>\
-		<option value="2"' + (activeTasks[index] == 2 ? ' selected' : '') + '>Приоритет</option>\
-	</select>';
+	let titleQuestsBlock = ['Без суика', 'С суиком'];
 
-});	
+	let questsBlock = '';
 
-let testTags = (my_id == 10901047) ? '<input class="input__test" type="text" value="">' : '';
+	for (let key in listQuests) {
+		
+		key = parseInt(key);
 
-userProfiles = readLocalStorage('user__profiles') || {};
+		let listItems = '';
 
-let htmlProfiles = '<select class="bot__profile"><option value="1">Новый профиль</option>';
+		listQuests[key].forEach((item) => {
 
-for (var q in userProfiles) {
-	
-	q = parseInt(q);
-	
-	htmlProfiles += '<option value="' + q + '">' + userProfiles[q]['name'] + '</option>';
-	
-}
-
-htmlProfiles += '</select>';
-
-let my__tags = '<!--Теги-->\
-	<div id="chris__menu" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">'
-		+ testTags +
-		'<a href="#" hidefocus="true" class="popupClose"></a>\
-		<button class="bossButton menu__button cssGreenButton2 b__setting" hidefocus="true">Настройки</button>\
-		<button class="bossButton menu__button cssGreenButton2 b__start" hidefocus="true">Старт</button>\
-		<div class="gav__gav__gav">\
-			<div class="vk__slide io__io">ИО-ИО-ИО</div>\
-			<div class="vk__slide img__1"></div>\
-			<div class="vk__slide img__2"></div>\
-		</div>\
-	</div>\
-	<div id="win__settings" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">\
-		<a href="#" hidefocus="true" class="popupClose"></a>\
-		<div class="board__layout">\
-			<div class="left">\
-				<div class="board__text">'
-					+ htmlProfiles +
-					'<input type="text" class="name__profile" placeholder="Введите название">\
-					<button class="profile__button b__save">Сохранить</button>\
+			listItems += '<div id="card' + item + '" class="card mymenu" draggable="true" ondragstart="dragStart(event)" title="' + __dqs[item].text + '">' + 
+				__dqs[item].title +
+				'<div class="block__checkbox">\
+					<label class="checkbox__bronze">\
+						<input class="' + item + '-0" type="checkbox"' + (questsCheckbox[item][0] ? ' checked' : '') + '>\
+						<span></span>\
+					</label>\
+					<label class="checkbox__gold">\
+						<input class="' + item + '-1" type="checkbox"' + (questsCheckbox[item][1] ? ' checked' : '') + '>\
+						<span></span>\
+					</label>\
+					<label class="checkbox__brilliant">\
+						<input class="' + item + '-2" type="checkbox"' + (questsCheckbox[item][2] ? ' checked' : '') + '>\
+						<span></span>\
+					</label>\
 				</div>\
-				<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
-				<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
-				<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр'
-			+ selectTags +
-			'</div>\
-			<div id="boardlists" class="board__lists">'
-			+ questsBlock +
-			'</div>\
+			</div>';
+
+		});
+		
+		questsBlock += '<div id="list' + key + '" class="board__list" ondrop="dropIt(event)" ondragover="allowDrop(event)">\
+			<div class="list__title">' + titleQuestsBlock[key] + '</div>'
+			+ listItems +
+		'</div>'
+	}
+
+	let selectTags = '';
+
+	$.each(['bronze', 'gold', 'brilliant'], (index, value) => {
+		
+		selectTags += '<select class="quest__color quest__' + value + '">\
+			<option value="0"' + (activeTasks[index] == 0 ? ' selected' : '') + '>Игнорировать</option>\
+			<option value="1"' + (activeTasks[index] == 1 ? ' selected' : '') + '>Играть</option>\
+			<option value="2"' + (activeTasks[index] == 2 ? ' selected' : '') + '>Приоритет</option>\
+		</select>';
+
+	});	
+
+	let testTags = (my_id == 10901047) ? '<input class="input__test" type="text" value="">' : '';
+
+	userProfiles = readLocalStorage('user__profiles') || {};
+
+	let htmlProfiles = '<select class="bot__profile"><option value="1">Новый профиль</option>';
+
+	for (var q in userProfiles) {
+		
+		q = parseInt(q);
+		
+		htmlProfiles += '<option value="' + q + '"' + ((userSelectedProfile == q) ? ' selected' : '') + '>' + userProfiles[q]['name'] + '</option>';
+		
+	}
+
+	htmlProfiles += '</select>';
+
+	let my__tags = '<!--Теги-->\
+		<div id="chris__menu" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">'
+			+ testTags +
+			'<a href="#" hidefocus="true" class="popupClose"></a>\
+			<button class="bossButton menu__button cssGreenButton2 b__setting" hidefocus="true">Настройки</button>\
+			<button class="bossButton menu__button cssGreenButton2 b__start" hidefocus="true">Старт</button>\
+			<div class="gav__gav__gav">\
+				<div class="vk__slide io__io">ИО-ИО-ИО</div>\
+				<div class="vk__slide img__1"></div>\
+				<div class="vk__slide img__2"></div>\
+			</div>\
 		</div>\
-	</div>\
-';
+		<div id="win__settings" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">\
+			<a href="#" hidefocus="true" class="popupClose"></a>\
+			<div class="board__layout">\
+				<div class="left">\
+					<div class="board__text">'
+						+ htmlProfiles +
+						'<input type="text" class="name__profile" placeholder="Введите название">\
+						<button class="profile__button b__save">Сохранить</button>\
+					</div>\
+					<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
+					<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
+					<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр'
+				+ selectTags +
+				'</div>\
+				<div id="boardlists" class="board__lists">'
+				+ questsBlock +
+				'</div>\
+			</div>\
+		</div>\
+	';
+	
+	$('#chris__menu').length ? $('#chris__menu').remove() : false;
+	
+	$('#popup_container').append(my__tags);
+	
+	if (botStart) {
+		
+		$(".b__start").text('Стоп');
+		
+	}
+
+	$('#chris__menu').draggable();
+
+}
+
+$('#popup_container').append(my__style);
 
 $('.footerPanel').append('<li class="icon__heart"></li>');
 
-$('#popup_container').append(my__style + my__tags);
+loadProfileSettings();
 
-if (botStart) {
-	
-	$(".b__start").text('Стоп');
-	
-}
-
-$('#chris__menu').draggable();
-
-$(".icon__heart").click(e => { 
+$(".icon__heart").click(e => {
 
 	/**********Открытие окна меню**********/
 
@@ -721,7 +733,7 @@ $(".quest__color").change(e => {
 });
 
 
-$("#auk__ruby").change(e => { 
+$("#auk__ruby").change(e => {
 
 	/**********Событие на чекбокс аукциона за рубины**********/
 
@@ -742,7 +754,7 @@ $("#change__quests").change(e => {
 
 });
 
-$("#ext__buy").change(e => { 
+$("#ext__buy").change(e => {
 
 	/**********Событие на чекбокс покупки экстр**********/
 
@@ -752,7 +764,7 @@ $("#ext__buy").change(e => {
 
 });
 
-$(".block__checkbox [type=checkbox]").change(e => { 
+$(".block__checkbox [type=checkbox]").change(e => {
 
 	/**********Событие на чекбокс квестов**********/
 
@@ -784,6 +796,8 @@ $(".bot__profile").change(e => {
 	
 	writeLocalStorage('profile', userSelectedProfile);
 	
+	loadProfileSettings();
+	
 	//функци обновления настроек
 
 });
@@ -798,33 +812,25 @@ $(".b__save").click(e => {
 	
 	if (key == 1) {
 		
-		let key = parseInt(Object.keys(userProfiles).pop()) + 1;
+		key = parseInt(Object.keys(userProfiles).pop()) + 1;
 		
 	}
 	
+	if ($('.name__profile').val() == '') {
+	
+		$('.name__profile').val('Профиль №' + key);
+	
+	}
+
 	userProfiles[key] = userProfiles[key] || {};
 	
 	userProfiles[key]['name'] = $('.name__profile').val();
 	
-	//console.info(key, userProfiles[key]);
-	
-	/**userProfiles[key]['active__tasks'] = activeTasks;
-	
-	userProfiles[key]['auk__ruby'] = rolesRuby;
-	
-	userProfiles[key]['change__quests'] = questsRuby;
-	
-	userProfiles[key]['ext__buy'] = extBuy;
-	
-	userProfiles[key]['quests__checkbox'] = questsCheckbox;
-	
-	userProfiles[key]['quests'] = listQuests;**/
-	
 	writeLocalStorage('user__profiles', userProfiles);
+	
+	userSelectedProfile = key;
 
 });
-
-
 
 const spouse = () => { 
 
