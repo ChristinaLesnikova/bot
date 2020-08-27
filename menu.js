@@ -673,7 +673,7 @@ const loadProfileSettings = (param) => {
 						+ htmlProfiles +
 						'<input type="text" class="name__profile" placeholder="Введите название">\
 						<button class="profile__button b__save">Сохранить</button>\
-						<button class="profile__button b__export">Экспорт</button>\
+						<button class="profile__button b__export" style="display: none">Экспорт</button>\
 					</div>\
 					<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
 					<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
@@ -871,7 +871,7 @@ const loadProfileSettings = (param) => {
 	
 	$(".b__export").click(e => {
 		
-		console.info(exportProfiles());
+		//console.info(exportProfiles());
 		
 	});
 	
@@ -901,17 +901,17 @@ let exportProfiles = () => {
 
 		key = parseInt(key);
 		
-		let questsExport = localStorage["quests_" + my_id + "_" + key];
+		let questsExport = JSON.parse(localStorage.getItem("quests_" + my_id + "_" + key));
 		
-		let auk__ruby_e = (localStorage["auk__ruby_" + my_id + "_" + key]) ? true : false;
+		let auk__ruby_e = JSON.parse(localStorage.getItem("auk__ruby_" + my_id + "_" + key)) ? true : false;
 		
-		let active__tasks_e = (localStorage["active__tasks_" + my_id + "_" + key]) ? (localStorage["active__tasks_" + my_id + "_" + key]) : [1, 1, 1];
+		let active__tasks_e = JSON.parse(localStorage.getItem("active__tasks_" + my_id + "_" + key)) ? JSON.parse(localStorage.getItem("active__tasks_" + my_id + "_" + key)) : [1, 1, 1];
 		
-		let change__quests_e = (localStorage["change__quests_" + my_id + "_" + key]) ? true : false;
+		let change__quests_e = JSON.parse(localStorage.getItem("change__quests_" + my_id + "_" + key)) ? true : false;
 		
-		let ext__buy_e = (localStorage["ext__buy_" + my_id + "_" + key]) ? true : false;
+		let ext__buy_e = JSON.parse(localStorage.getItem("ext__buy_" + my_id + "_" + key)) ? true : false;
 		
-		scriptReturn += `${key}: {"name": "${userProfilesExport[key]["name"]}","auk__ruby": ${auk__ruby_e},"active__tasks": ${active__tasks_e},"change__quests": ${change__quests_e},"ext__buy": ${ext__buy_e},"quests__checkbox": ${localStorage["quests__checkbox_" + my_id + "_" + key]},"version": ${localStorage["version"]},"quests": `;
+		scriptReturn += `${key}: {"name": "${userProfilesExport[key]["name"]}","auk__ruby": ${auk__ruby_e},"active__tasks": [${active__tasks_e}],"change__quests": ${change__quests_e},"ext__buy": ${ext__buy_e},"quests__checkbox": ${localStorage["quests__checkbox_" + my_id + "_" + key]},"version": "${botVersion}","quests": [`;
 		
 		for (let q in questsExport) {
 
@@ -919,7 +919,7 @@ let exportProfiles = () => {
 
 		}
 
-		scriptReturn += `},`;
+		scriptReturn += `]},`;
 
 	}
 
