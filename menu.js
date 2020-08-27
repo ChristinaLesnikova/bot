@@ -1,5 +1,7 @@
 'use strict';
 
+let botVersion = '1.02';
+
 let urlKey = '/standalone/' + _MBK.toString().split('/')[2] + '/DO/';
 
 let userProfiles = {};
@@ -405,7 +407,11 @@ const readLocalStorage = (key) => {
 
 	/**********Получение значения по ключу из локального хранилища**********/
 	
-	key = (!['version', 'profile', 'user__profiles'].includes(key)) ? key + '_' + my_id + '_' + userSelectedProfile : key + '_' + my_id;
+	if (key != 'version') {
+	
+		key = (!['profile', 'user__profiles'].includes(key)) ? key + '_' + my_id + '_' + userSelectedProfile : key + '_' + my_id;
+		
+	}
 
 	let resultLS = JSON.parse(localStorage.getItem(key));
 
@@ -481,7 +487,11 @@ const writeLocalStorage = (section, elementId, block) => {
 
 	}
 
-	section = (!['version', 'profile', 'user__profiles'].includes(section)) ? section + '_' + my_id + '_' + userSelectedProfile : section + '_' + my_id;	
+	if (section != 'version') {
+	
+		section = (!['profile', 'user__profiles'].includes(section)) ? section + '_' + my_id + '_' + userSelectedProfile : section + '_' + my_id;
+		
+	}
 
 	localStorage.setItem(section, JSON.stringify(elementsLS));
 
@@ -507,11 +517,11 @@ const removeLocalStorage = (key) => {
 
 let version = readLocalStorage("version");
 
-if (version != '1.01') {
+if (version != botVersion) {
 	
 	removeLocalStorage("all");
 	
-	writeLocalStorage('version', '1.01');
+	writeLocalStorage('version', botVersion);
 	
 }
  
@@ -1113,8 +1123,12 @@ const dropIt = (e) => {
 	let idQuest = parseInt($(sourceIdEl).attr("id").replace(/\D+/g,""));
 
 	let idContainer = parseInt($(targetEl).attr("id").replace(/\D+/g,""));
+	
+	if (idQuest && (idContainer > 0 || idContainer === 0)){
 
-	writeLocalStorage('quests', idQuest, idContainer);
+		writeLocalStorage('quests', idQuest, idContainer);
+
+	}
 
 	if (targetEl) {
 
