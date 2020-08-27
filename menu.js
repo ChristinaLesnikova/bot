@@ -219,6 +219,7 @@ let my__style = '\
 			font-weight: bold;\
 			font-size: 20px;\
 			margin-top: -10px;\
+			width: 97%;\
 		}\
 		.board__lists {\
 			display: grid;\
@@ -231,7 +232,7 @@ let my__style = '\
 		.board__layout .left {\
 			z-index: 99999999;\
 			margin-top: -10px;\
-			position: fixed;\
+			position: absolute;\
 			background-color: inherit;\
 		}\
 		.board__list {\
@@ -642,7 +643,7 @@ const loadProfileSettings = (param) => {
 
 	let htmlProfiles = '<select class="bot__profile"><option value="1">Новый профиль</option>';
 
-	for (var q in userProfiles) {
+	for (let q in userProfiles) {
 		
 		q = parseInt(q);
 		
@@ -672,6 +673,7 @@ const loadProfileSettings = (param) => {
 						+ htmlProfiles +
 						'<input type="text" class="name__profile" placeholder="Введите название">\
 						<button class="profile__button b__save">Сохранить</button>\
+						<button class="profile__button b__export">Экспорт</button>\
 					</div>\
 					<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
 					<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
@@ -867,6 +869,12 @@ const loadProfileSettings = (param) => {
 
 	});
 	
+	$(".b__export").click(e => {
+		
+		console.info(exportProfiles());
+		
+	});
+	
 	if (!param) {
 	
 		$("#chris__menu").css("display") == 'block' ? $("#chris__menu").hide(100) : $("#chris__menu").show(100);
@@ -880,6 +888,68 @@ const loadProfileSettings = (param) => {
 		$('.name__profile').val($('.bot__profile option:selected').text());
 
 	}
+
+}
+
+let exportProfiles = () => { 
+
+	let userProfilesExport = readLocalStorage('user__profiles') || {};
+
+	let scriptReturn = `localStorage.clear();let profileNames = {};let exportProfile = {`;
+
+	for (let key in userProfilesExport) {
+
+		key = parseInt(key);
+		
+		let questsExport = localStorage["quests_" + my_id + "_" + key];
+		
+		let auk__ruby_e = (localStorage["auk__ruby_" + my_id + "_" + key]) ? true : false;
+		
+		let active__tasks_e = (localStorage["active__tasks_" + my_id + "_" + key]) ? (localStorage["active__tasks_" + my_id + "_" + key]) : [1, 1, 1];
+		
+		let change__quests_e = (localStorage["change__quests_" + my_id + "_" + key]) ? true : false;
+		
+		let ext__buy_e = (localStorage["ext__buy_" + my_id + "_" + key]) ? true : false;
+		
+		scriptReturn += `${key}: {"name": "${userProfilesExport[key]["name"]}","auk__ruby": ${auk__ruby_e},"active__tasks": ${active__tasks_e},"change__quests": ${change__quests_e},"ext__buy": ${ext__buy_e},"quests__checkbox": ${localStorage["quests__checkbox_" + my_id + "_" + key]},"version": ${localStorage["version"]},"quests": `;
+		
+		for (let q in questsExport) {
+
+			scriptReturn += `${questsExport[q]}`;
+
+		}
+
+		scriptReturn += `},`;
+
+	}
+
+	scriptReturn += `};
+	
+	for (let key in exportProfile) {
+		
+		profileNames[key] = {}; 
+		
+		profileNames[key]["name"] = exportProfile[key]["name"]; 
+
+		localStorage.setItem("version", JSON.stringify(exportProfile[key]["version"])); 
+		
+		localStorage.setItem("auk__ruby_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["auk__ruby"])); 
+		
+		localStorage.setItem("ext__buy_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["ext__buy"]));
+		
+		localStorage.setItem("active__tasks_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["active__tasks"])); 
+		
+		localStorage.setItem("change__quests_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["change__quests"]));
+		
+		localStorage.setItem("quests__checkbox_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["quests__checkbox"]));
+		
+		localStorage.setItem("quests_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["quests"]));};
+		
+		localStorage.setItem("user__profiles_" + my_id, JSON.stringify(profileNames));
+		
+		location.reload();`;
+
+	return scriptReturn;
 
 }
 
@@ -2298,7 +2368,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 			
 			let optionSuikYes = 0;
 			
-			for (var q in questsFinish) {
+			for (let q in questsFinish) {
 				
 				q = parseInt(q);
 
