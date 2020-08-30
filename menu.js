@@ -6,7 +6,7 @@ let urlKey = '/standalone/' + _MBK.toString().split('/')[2] + '/DO/';
 
 let userProfiles = {};
 
-let userSelectedProfile, listQuests, botStart, activeTasks, rolesRuby, questsRuby, extBuy, questsCheckbox;
+let userSelectedProfile, listQuests, botStart, botLeague, activeTasks, rolesRuby, questsRuby, extBuy, questsCheckbox;
 
 let speedSetInterval = 500;
 
@@ -20,7 +20,7 @@ let leagueEntry = (my_league > 3) ? 3 : my_league;
 
 let color = {"bronze": 0, "gold": 1, "brilliant": 2};
 
-let minCountExtBuy = {101: 5, 102: 1, 103: 3, 104: 2, 107: 1, 114: 3};
+let minCountExtBuy = {101: 5, 102: 1, 103: 3, 104: 3, 107: 1, 114: 3};
 
 let minCountClanExtBuy = {155: 3, 156: 3, 170: 3, 159: 3};
 
@@ -162,11 +162,11 @@ let extraTextProva = {
 		
 		317: 'Таро от Бандитос раскрыли роль: ',
 		
-		329: 'Экстра «Негативный эффект раскрыла роль: '
+		329: 'Экстра «Негативный эффект раскрыла роль: ',
+		
+		1562: 'Талант/усиление «Таро бустер» раскрыл вам роль игрока'
 		
 };
-
-let prigUsers = {};
 
 /**********Стили меню**********/
 
@@ -234,6 +234,18 @@ let my__style = '\
 			margin-top: -10px;\
 			position: absolute;\
 			background-color: inherit;\
+			font-size: 12px;\
+		}\
+		.bot__liga {\
+			float: right;\
+			background-color: bisque;\
+			color: brown;\
+			border: 1px solid gray;\
+			position: absolute;\
+			right: 18px;\
+		}\
+		.settingCheckbox {\
+			float: left;\
 		}\
 		.board__list {\
 			background-color: darkmagenta;\
@@ -395,14 +407,101 @@ let my__style = '\
 			color: brown;\
 			border: 1px solid gray;\
 			height: 15px;\
+			float: left;\
 		}\
 		.bot__profile {\
 			background-color: bisque;\
 			color: brown;\
 			border: 1px solid gray;\
+			float: left;\
+		}\
+		.bot__informer {\
+			width: 144px;\
+			height: auto;\
+			position: absolute !important;\
+			top: 211px;\
+			left: 20px;\
+			background-color: violet;\
+			color: darkred;\
+			font-weight: bold;\
+			padding: 10px;\
+			font-size: 9px;\
+			opacity: 0.5;\
+			z-index: 999999;\
+		}\
+		.infoblock {\
+			margin-bottom: 2px;\
+		}\
+		.infoblock span {\
+			float: right;\
+		}\
+		.bot__nav .profile__button {\
+			width: 100%;\
+			margin-top: 2px;\
+		}\
+		.bot__stiker {\
+			background-image: url(https://vk.com/sticker/1-21794-128);\
+			height: 85px;\
+			width: 100px;\
+			background-size: 85%;\
+			background-repeat: no-repeat;\
+			background-position-x: right;\
+			float: right;\
+			margin-top: 7px;\
+		}\
+		.bot__stiker:hover {\
+			background-image: url(https://vk.com/sticker/1-16967-128);\
+		}\
+		.bot__informer:hover {\
+			opacity: 1;\
+		}\
+		.duel__result {\
+			width: 55px;\
+			position: absolute;\
+			margin-top: 35px;\
+			text-align: justify;\
+		}\
+		.duel__result span {\
+			color: red;\
+		}\
+		.duel__result .clan__win {\
+			color: green;\
+		}\
+		.bot__stiker.bot__win30 {\
+			background-image: url(https://vk.com/sticker/1-21826-128);\
+		}\
+		.bot__stiker.bot__win21 {\
+			background-image: url(https://vk.com/sticker/1-21810-128);\
+		}\
+		.bot__stiker.bot__win12 {\
+			background-image: url(https://vk.com/sticker/1-21825-128);\
+		}\
+		.bot__stiker.bot__win03 {\
+			background-image: url(https://vk.com/sticker/1-21832-128);\
 		}\
 	</style>\
 ';
+
+let inform = '<div class="bot__informer">\
+	<div class="infoblock quest__bronze"></div>\
+	<div class="infoblock quest__gold"></div>\
+	<div class="infoblock quest__brilliant"></div>\
+	<div class="bot__nav">\
+		<button class="profile__button" onclick="_Duels();return false">Дуэль</button>\
+		<button class="profile__button" onclick="_WND_proc(\'clans\');return false">Мой клан</button>\
+		<button class="profile__button" onclick="_WND_proc(\'top\');return false">Топы</button>\
+	</div>\
+	<div class="duel__result">\
+		<div class="result__row__1"><span class="my__clan">0</span> - <span class="no__my__clan">0</span></div>\
+		<div class="result__row__2"><span class="my__clan">0</span> - <span class="no__my__clan">0</span></div>\
+		<div class="result__row__3"><span class="my__clan">0</span> - <span class="no__my__clan">0</span></div>\
+	</div>\
+	<div class="bot__stiker"></div>\
+</div>';
+
+$('#rootContainer').prepend(inform);
+
+$('.bot__informer').draggable();
 
 const readLocalStorage = (key) => { 
 
@@ -421,6 +520,8 @@ const readLocalStorage = (key) => {
 };
 
 const writeLocalStorage = (section, elementId, block) => {
+	
+	//console.info(section, elementId, block);
 
 	/**********Записываем значение в локальное хранилище**********/
 
@@ -450,6 +551,8 @@ const writeLocalStorage = (section, elementId, block) => {
 					
 				} catch (error) {
 					
+					//console.info(parseInt($('#card' + block).parent().attr("id").replace(/\D+/g,"")));
+					
 					elementsLS[parseInt($('#card' + block).parent().attr("id").replace(/\D+/g,""))].push(parseInt(elementId));
 					
 				}
@@ -465,6 +568,8 @@ const writeLocalStorage = (section, elementId, block) => {
 			break;
 			
 		case "start":
+		
+		case "league":
 
 		case "active__tasks":
 
@@ -553,6 +658,14 @@ const loadProfileSettings = (param) => {
 	questsCheckbox = readLocalStorage("quests__checkbox");
 	
 	botStart = readLocalStorage("start");
+	
+	botLeague = readLocalStorage("league");
+	
+	if (!botLeague) {
+		
+		botLeague = 0;
+		
+	}
 	
 	if (!listQuests) {
 
@@ -652,6 +765,16 @@ const loadProfileSettings = (param) => {
 	}
 
 	htmlProfiles += '</select>';
+	
+	let htmlLeague = '<select class="bot__liga">';
+	
+	['Все лиги', 'Бронза', 'Серебро', 'Золото+', 'Своя лига', 'Не своя лига'].forEach((selectLeague, i) => {
+	
+		htmlLeague += '<option value="' + i + '"' + (i == botLeague ? ' selected' : '') + '>' + selectLeague + '</option>';
+			
+	});
+
+	htmlLeague += '</select>';
 
 	let my__tags = '<!--Теги-->\
 		<div id="chris__menu" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">'
@@ -675,9 +798,12 @@ const loadProfileSettings = (param) => {
 						<button class="profile__button b__save">Сохранить</button>\
 						<button class="profile__button b__export" style="display: none">Экспорт</button>\
 					</div>\
-					<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
-					<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
-					<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр<br>'
+					<div class="settingCheckbox">\
+						<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
+						<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
+						<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр'
+						+ htmlLeague + '<br>' +
+					'</div>'
 				+ selectTags +
 				'</div>\
 				<div id="boardlists" class="board__lists">'
@@ -748,6 +874,16 @@ const loadProfileSettings = (param) => {
 		}
 
 		writeLocalStorage('start', botStart);
+
+	});
+	
+	$(".bot__liga").change(e => {
+
+		/**********Событие на select по выбору лиги**********/
+		
+		botLeague = parseInt(e.target.value);
+		
+		writeLocalStorage('league', botLeague);
 
 	});
 
@@ -962,6 +1098,16 @@ $(".icon__heart").click(e => {
 	/**********Открытие окна меню**********/
 
 	$("#chris__menu").css("display") == 'block' ? $("#chris__menu").hide(100) : $("#chris__menu").show(100);
+	
+	$(".bot__informer").show(100);
+
+});
+
+$(".bot__stiker").click(e => {
+
+	/**********Закрыть инфоокно**********/
+
+	$('.bot__informer').hide(100);
 
 });
 
@@ -1089,8 +1235,16 @@ const botExit = (questsArr) => {
 		});
 
 		if (exit || pla_data['dead'] || $('#pp_fin').length) {
+			
+			if (questsArr.includes(62) && (parseInt($('#gxt_115').not('.disabled').find('.count').text()))) {
+				
+				 useExtra([115], userKiller);
+				
+			} else {
 		
-			_DLG('exit', 2, event);
+				_DLG('exit', 2, event);
+				
+			}
 			
 		}
 
@@ -1100,7 +1254,41 @@ const botExit = (questsArr) => {
 
 };
 
-const EnterTheRoom = async (uCount, uLeague) => { 
+const checkLag = () => {
+	
+	let gId = gam_id;
+
+	let urlKey = '/standalone/' + _MBK.toString().split('/')[2] + '/DO/';	
+
+	$.ajax({
+
+		async: true,
+
+		cache: false,
+
+		type: "POST",
+		
+		url: urlKey + Math.random(),
+
+		data: {method: "ch_nick", val: my_nick},
+
+		dataType: "json",
+
+		success: (data) => {
+			
+			if (data.err != 2 && !gam_id && ifc_mode == 'chat' && gId == gam_id) {
+				
+				//window.location.reload();
+				
+			}
+			
+		}
+		
+	});
+
+}
+
+const searchRoom = async (uCount, uLeague) => { 
 
 	/**********Поиск комнат и вход**********/
 	
@@ -1121,6 +1309,62 @@ const EnterTheRoom = async (uCount, uLeague) => {
 		success: (data) => {
 
 			if (typeof data.gml != "undefined") {
+				
+				let botAllLeague = [];
+				
+				if (!uLeague) {
+				
+					switch (botLeague) {
+							
+						case 0:
+						
+							botAllLeague = [1,2,3].filter(function(item) {
+
+								return item <= my_league;
+
+							});
+						
+							break;
+							
+						case 1:
+						
+							botAllLeague = [1];
+						
+							break;
+							
+						case 2:
+						
+							botAllLeague = [2];
+						
+							break;
+							
+						case 3:
+						
+							botAllLeague = [3];
+						
+							break;
+							
+						case 4:
+					
+							botAllLeague = [(my_league > 3) ? 3 : my_league];
+						
+							break;
+							
+						case 5:
+						
+							botAllLeague = [1,2,3].filter(function(item) { 
+							
+								let l = (my_league > 3) ? 3 : my_league;
+
+								return item !== l;
+
+							});
+						
+							break;
+						
+					}
+				
+				}
 
 				$.each(data.gml, (i, row) => {
 
@@ -1128,7 +1372,9 @@ const EnterTheRoom = async (uCount, uLeague) => {
 					
 					if (!uLeague) {
 						
-						if (row[3] == uCount && row[4] <= leagueEntry && delta < 5 && delta > 0 && row[5] == "20") {
+						if (row[3] == uCount && botAllLeague.includes(parseInt(row[4])) && delta < 5 && delta > 0 && row[5] == "20" && ifc_mode == 'chat') {
+							
+							checkLag();
 
 							_GM_action('gml', 'join', row[0], event);
 
@@ -1136,7 +1382,9 @@ const EnterTheRoom = async (uCount, uLeague) => {
 						
 					} else {
 
-						if (row[3] == uCount && row[4] == leagueEntry && delta < 5 && delta > 0 && row[5] == "20") {
+						if (row[3] == uCount && row[4] == leagueEntry && delta < 5 && delta > 0 && row[5] == "20" && ifc_mode == 'chat') {
+							
+							checkLag();
 
 							_GM_action('gml', 'join', row[0], event);
 
@@ -1167,6 +1415,8 @@ const dragStart = (e) => {
 	/**********Перетаскивание квеста в настройках**********/
 
 	e.dataTransfer.setData("text/plain", e.target.id);
+	
+	//console.info($(e.target).parents()[0].id);
 
 };
 
@@ -1193,6 +1443,9 @@ const dropIt = (e) => {
 	let idQuest = parseInt($(sourceIdEl).attr("id").replace(/\D+/g,""));
 
 	let idContainer = parseInt($(targetEl).attr("id").replace(/\D+/g,""));
+	
+	//console.info(idQuest, idContainer);
+	
 	
 	if (idQuest && (idContainer > 0 || idContainer === 0)){
 
@@ -1354,7 +1607,73 @@ const rewardActualQuests = async () => {
 
 						});
 						
-					} catch (error) {}
+						for (let v in data['arr'][5]) {
+							
+							$('.result__row__' + v + ' .my__clan').text(data['arr'][5][v][0]);
+							
+							$('.result__row__' + v + ' .no__my__clan').text(data['arr'][5][v][1]);
+							
+						}
+						
+					} catch (error) {};
+					
+					try {
+						
+						$('.duel__result').removeClass('clan__win');
+
+						$('.bot__stiker').removeClass('bot__win30', 'bot__win21', 'bot__win12', 'bot__win03');
+						
+						let countWin = 0;
+						
+						for (let v in data['arr'][5]) {
+							
+							$('.result__row__' + v + ' .my__clan').text(data['arr'][5][v][0]);
+							
+							$('.result__row__' + v + ' .no__my__clan').text(data['arr'][5][v][1]);
+							
+							if (data['arr'][5][v][0] > data['arr'][5][v][1]) {
+								
+								$('.result__row__' + v + ' .my__clan').addClass('clan__win');
+								
+								countWin++;
+
+							} else if (data['arr'][5][v][0] < data['arr'][5][v][1]) {
+				
+								$('.result__row__' + v + ' .no__my__clan').addClass('clan__win');
+								
+							}
+							
+						}
+					
+						switch (countWin) {
+								
+							case 0: 
+							
+								$('.bot__stiker').addClass('bot__win03');
+
+								break;
+								
+							case 1: 
+							
+								$('.bot__stiker').addClass('bot__win12');
+
+								break;
+								
+							case 2: 
+							
+								$('.bot__stiker').addClass('bot__win21');
+
+								break;
+								
+							case 3: 
+							
+								$('.bot__stiker').addClass('bot__win30');
+
+								break;
+								
+						}						
+						
+					} catch(error) {};
 
 					resolve([my_quests, my_quests_limit]);
 
@@ -1485,6 +1804,17 @@ const useExtra = (arr, listKill, extraUserId) => {
 const runQuests = (my_quests, my_quests_limit) => {  
 
 	/**********Выполнение квестов**********/
+	let randomNum = Math.floor(Math.random() * Math.floor(3));
+	
+	if (randomNum == 2){
+	
+		['bronze', 'gold', 'brilliant'].forEach((colorQuest, i) => {
+			
+			$('.infoblock.quest__' + colorQuest).html(__dqs[my_quests[i]]['title'] + '<span>' + my_quests_limit[i] +'/' + __dqs[my_quests[i]]['limits'][i] + '</span>');
+			
+		});
+		
+	}
 
 	let questsEnd = false;
 	
@@ -1497,8 +1827,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 			taroMan = 0;
 
 			taroMaf = 0;
-			
-			prigUsers = {};
 		
 			questsFinish = {};
 			
@@ -1632,7 +1960,9 @@ const runQuests = (my_quests, my_quests_limit) => {
 							
 								/**********Сбить босса на главной странице**********/
 							
-								_DLG('boss', 2, event);
+								//_DLG('boss', 2, event);
+								
+								questsFinish[quest] = 1;
 								
 								allowRoom = false;
 							
@@ -1660,7 +1990,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 					
 					}
 					
-					EnterTheRoom(usersCountRoom, uLeague);
+					searchRoom(usersCountRoom, uLeague);
 					
 				}
 				
@@ -1674,9 +2004,147 @@ const runQuests = (my_quests, my_quests_limit) => {
 				
 				if (!activeTasks[i]) return true;
 				
+				let aukTake = false;
+				
 				questsFinish[quest] = ([81, 79, 77, 50, 49, 48, 47, 46, 45, 44, 43, 42, 20].includes(quest)) ? 1 : 0;
 					
 				switch (quest) {
+					
+					/**********Аукцион ком**********/
+					
+					case 13:
+					
+					case 29:
+					
+					case 42:
+					
+						if (gam_data['sale_p'] == 4){
+							
+							aukTake = true;
+							
+						}
+					
+						break;
+						
+					/**********Аукцион док**********/
+						
+					case 14:
+					
+					case 30:
+					
+					case 43:
+					
+						if (gam_data['sale_p'] == 6){
+							
+							aukTake = true;
+							
+						}
+					
+						break;
+
+					/**********Аукцион стерва**********/
+						
+					case 15:
+					
+					case 31:
+					
+					case 44:
+					
+						if (gam_data['sale_p'] == 10 || gam_data['sale_p'] == 11){
+							
+							aukTake = true;
+							
+						}
+					
+						break;
+						
+					/**********Аукцион свид**********/
+						
+					case 16:
+					
+					case 32:
+					
+					case 45:
+					
+						if (gam_data['sale_p'] == 12){
+							
+							aukTake = true;
+							
+						}
+					
+						break;
+						
+					/**********Аукцион босс**********/
+						
+					case 18:
+					
+					case 27:
+					
+					case 28:
+					
+					case 46:
+					
+						if (gam_data['sale_p'] == 9){
+							
+							aukTake = true;
+							
+						}
+					
+						break;
+						
+					/**********Аукцион двул**********/
+						
+					case 19:
+					
+					case 24:
+					
+					case 33:
+					
+					case 47:
+					
+						if (gam_data['sale_p'] == 25){
+							
+							aukTake = true;
+							
+						}
+					
+						break;
+						
+					/**********Аукцион ман**********/
+						
+					case 20:
+					
+					case 26:
+					
+					case 48:
+					
+						if (gam_data['sale_p'] == 3){
+							
+							aukTake = true;
+							
+						}
+					
+						break;
+						
+					/**********Аукцион любая роль**********/
+						
+					case 49:
+					
+						aukTake = true;
+					
+						break;
+						
+					/**********Аукцион 20 монет**********/
+
+					case 50:
+					
+						if (gam_data['sale_b'] < 20 && gam_data['sale_p']) {
+							
+							_GM_action('', 'sale_bet', 0);
+
+						}
+					
+						break;
 				
 					case 76: 
 					
@@ -1689,6 +2157,8 @@ const runQuests = (my_quests, my_quests_limit) => {
 							countExtra = countExtra ? parseInt(countExtra) : 0;
 							
 							if (countExtra < val) {
+								
+								//console.info(key, countExtra, val);
 
 								extraBuy(key);
 								
@@ -1767,24 +2237,8 @@ const runQuests = (my_quests, my_quests_limit) => {
 						break;						
 				
 				}
-					
-			});
-				
-			if ($('#auctionPopup').length) {
-				
-				if (my_quests.includes(auctionRolesSuik[gam_data['sale_p']]) || my_quests.includes(49)) {
 
-					if (rolesRuby && parseInt($('.rubyBalance').text())) {
-						
-						_GM_action('', 'sale_bet', 2, event);
-						
-					} else if (gam_data['sale_t'] < 3 && gam_data['sale_b'] < 500) {
-						
-						_GM_action('', 'sale_bet', 0);
-						
-					}
-
-				} else if (my_quests.includes(auctionRolesWin[gam_data['sale_p']])) {
+				if (aukTake) {
 					
 					if (rolesRuby && parseInt($('.rubyBalance').text())) {
 
@@ -1796,13 +2250,9 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 					}
 					
-				} else if (my_quests.includes(50) && gam_data['sale_b'] < 20) {
-					
-					_GM_action('', 'sale_bet', 0);
-
 				}
-			
-			}
+				
+			});
 
 			break;
 
@@ -1810,7 +2260,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 		
 			$.each(my_quests, (i, quest) => {
 				
-				if (!activeTasks[i] || questsFinish[quest]) return true;
+				if (!activeTasks[i] || (questsFinish[quest] && ![52, 61].includes(quest))) return true;
 				
 				let autosuik = false;
 				
@@ -2074,11 +2524,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 								
 								questsEnd = (parseInt($('#gxt_114').not('.disabled').find('.count').text())) ? useExtra([114]) : true;
 								
-							}
-							
-							if (questsEnd) {	
-								
-								questsFinish[quest] = 1;
+								questsFinish[quest] = listQuests[1].includes(quest) ? 1 : 0;
 								
 							}
 
@@ -2094,18 +2540,18 @@ const runQuests = (my_quests, my_quests_limit) => {
 								
 								questKiller = true;								
 								
-								$.each(my_quests, (i, value) => {
+								$.each(my_quests, (n, value) => {
 								
-									if (!activeTasks[i] || questsFinish[value]) return true;
+									if (!activeTasks[n] || questsFinish[value]) return true;
 
-									if (questsPriority.includes(value)) {
+									if (questsPriority.includes(value) || ((activeTasks[i] == 1 || !listQuests[1].includes(quest)) && value != quest)) {
 									
 										questKiller = false;
-										
+
 									}
 								
 								});
-								
+
 								if (questKiller) {
 
 									_DLG('exit', 2, event);
@@ -2399,12 +2845,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 			readSMS();
 			
 			readUserList();
-			
-			if (pla_data['kvt']) {
-				
-				judgment();
-				
-			}
 
 			break;
 
@@ -2550,14 +2990,14 @@ const runBot = (param, id, nick, role) => {
 				
 					if (pla_data['person'] != 3) {
 						
-						if (taroMan) {
-
+						if (taroMan && !questsFinish[73]) {
+							
 							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
-						
+
 							if (questsEnd) {
-							
+
 								questsFinish[73] = 1;
-							
+
 							}
 							
 						}
@@ -2568,18 +3008,16 @@ const runBot = (param, id, nick, role) => {
 							
 						}
 						
-						prigUsers[id] = 1;
-						
 					}
 				
 					break;
 				
 				case 'мафию':
 				
-					if (taroMaf) {
-
-						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
+					if (taroMaf && !questsFinish[72]) {
 					
+						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
+						
 						if (questsEnd) {
 						
 							questsFinish[72] = 1;
@@ -2588,40 +3026,22 @@ const runBot = (param, id, nick, role) => {
 						
 					}
 				
-					if (![2, 9, 25, 47].includes(pla_data['person'])) {
-						
-						if (!pla_data["act"] && gam_data['v_mode']) {
-						
-							_GM_action('', 'vote', 2, [id, 0]);
+					if (![2, 9, 25, 47].includes(pla_data['person']) && !pla_data["act"] && gam_data['v_mode']) {
+
+						_GM_action('', 'vote', 2, [id, 0]);
 							
-						}
-						
-						prigUsers[id] = 1;
-						
 					}
 				
 					break;
 					
 				case 'Братьев Бандитос':
 				
-					if (![21, 24, 43].includes(pla_data['person'])) {
-						
-						if (!pla_data["act"] && gam_data['v_mode']) {
-						
-							_GM_action('', 'vote', 2, [id, 0]);
-							
-						}
-						
-						prigUsers[id] = 1;
+					if (![21, 24, 43].includes(pla_data['person']) && !pla_data["act"] && gam_data['v_mode']) {
+
+						_GM_action('', 'vote', 2, [id, 0]);
 						
 					}
 				
-					break;
-					
-				case 'граждан':
-				
-					prigUsers[id] = __team_by_person(pla_data['person']) ? 0 : 1;
-
 					break;
 
 			}		 
@@ -2638,16 +3058,16 @@ const runBot = (param, id, nick, role) => {
 				
 					if (pla_data['person'] != 3) {
 						
-						if (taroMan) {
+						if (taroMan && !questsFinish[73]) {
 
 							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
-						
+
 							if (questsEnd) {
 							
 								questsFinish[73] = 1;
 							
 							}
-							
+
 						}
 						
 						if (!pla_data["act"] && gam_data['v_mode']) {
@@ -2655,8 +3075,6 @@ const runBot = (param, id, nick, role) => {
 							_GM_action('', 'vote', 2, [id, 0]);
 							
 						}
-						
-						prigUsers[id] = 1;
 						
 					}
 				
@@ -2670,7 +3088,7 @@ const runBot = (param, id, nick, role) => {
 				
 				case 'Продажный полицейский':
 				
-					if (taroMaf) {
+					if (taroMaf && !questsFinish[72]) {
 
 						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
 					
@@ -2682,15 +3100,9 @@ const runBot = (param, id, nick, role) => {
 						
 					}
 				
-					if (![2, 9, 25, 47].includes(pla_data['person'])) {
-						
-						if (!pla_data["act"] && gam_data['v_mode']) {
-						
-							_GM_action('', 'vote', 2, [id, 0]);
-							
-						}
-						
-						prigUsers[id] = 1;
+					if (![2, 9, 25, 47].includes(pla_data['person']) && !pla_data["act"] && gam_data['v_mode']) {
+
+						_GM_action('', 'vote', 2, [id, 0]);
 						
 					}
 				
@@ -2710,16 +3122,8 @@ const runBot = (param, id, nick, role) => {
 							
 						}
 						
-						prigUsers[id] = 1;
-						
 					}
 				
-					break;
-					
-				default:
-				
-					prigUsers[id] = __team_by_person(pla_data['person']) ? 0 : 1;
-
 					break;
 
 			}		 
@@ -2735,8 +3139,6 @@ const runBot = (param, id, nick, role) => {
 				_GM_action('', 'vote', 2, [id, 0]);
 				
 			}
-			
-			prigUsers[id] = 1;
 		
 			break;
 		
@@ -2788,9 +3190,7 @@ const readUserList = () => {
 			
 			for (let key in personSquad) {
 			
-				if (personSquad[key].includes(roleId) && !personSquad[key].includes(pla_data['person'])) {
-					
-					prigUsers[personId] = 1;
+				if (personSquad[key].includes(roleId) && !personSquad[key].includes(parseInt(pla_data['person']))) {
 					
 					if (roleId == 3 && taroMan) {
 						
@@ -2815,7 +3215,7 @@ const readUserList = () => {
 						}							
 						
 					}
-					
+
 					setTimeout(() => gam_data['v_mode'] ? runBot(3, personId) : false, 3000);
 					
 					return false;
@@ -2830,15 +3230,7 @@ const readUserList = () => {
 
 }
 
-const judgment = () => {
-
-	prigUsers[pla_data['kvt']] ? _GM_action('', 'vote', 2, [pla_data['kvt'], 0]) : _GM_action('', 'vote', 1, [pla_data['kvt'], 0]);
-
-}
-
 const nightRun = () => {
-
-	
 
 }
 
