@@ -2,13 +2,13 @@
 
 let botVersion = '1.02';
 
+let timer;
+
 let urlKey = '/standalone/' + _MBK.toString().split('/')[2] + '/DO/';
 
 let userProfiles = {};
 
 let userSelectedProfile, listQuests, botStart, botLeague, activeTasks, rolesRuby, questsRuby, extBuy, questsCheckbox;
-
-let speedSetInterval = 500;
 
 let giftsSendTo = 10901047;
 
@@ -86,7 +86,7 @@ let personSquad = {
 	
 	/**********Мафиози**********/
 	
-	1: [2, 9, 25, 47],
+	1: [2, 9, 25, 26, 47],
 	
 	/**********Тони**********/
 	
@@ -279,6 +279,7 @@ let my__style = '\
 			color: darkred;\
 			border-radius: 3px;\
 			width: 189px;\
+			float: left;\
 		}\
 		.quest__bronze {\
 			background-color: #cd7f32;\
@@ -414,10 +415,11 @@ let my__style = '\
 			color: brown;\
 			border: 1px solid gray;\
 			float: left;\
+			width: auto;\
 		}\
 		.bot__informer {\
 			width: 144px;\
-			height: auto;\
+			height: 184px;\
 			position: absolute !important;\
 			top: 211px;\
 			left: 20px;\
@@ -479,6 +481,42 @@ let my__style = '\
 		.bot__stiker.bot__win03 {\
 			background-image: url(https://vk.com/sticker/1-21832-128);\
 		}\
+		.slider-wrapper {\
+			display: inline-block;\
+			width: 20px;\
+			height: 150px;\
+			padding: 0;\
+			position: absolute;\
+		}\
+		.slider-wrapper input {\
+			width: 150px;\
+			height: 20px;\
+			margin: 0;\
+			transform-origin: 75px 75px;\
+			transform: rotate(-90deg);\
+			width: 200px;\
+			margin-top: 76px;\
+			margin-left: 4px;\
+		}\
+		.tractor {\
+			position: absolute;\
+			bottom: 0;\
+			left: 4px;\
+			cursor: pointer;\
+		}\
+		.flat {\
+			position: absolute;\
+			margin-left: 2px;\
+			margin-top: 4px;\
+			left: 0;\
+			cursor: pointer;\
+		}\
+		.forze {\
+			position: relative;\
+			z-index: 99999;\
+			margin-left: 242px;\
+			margin-top: 11px;\
+		}\
 	</style>\
 ';
 
@@ -507,7 +545,7 @@ const readLocalStorage = (key) => {
 
 	/**********Получение значения по ключу из локального хранилища**********/
 	
-	if (key != 'version') {
+	if (!['version', 'speed'].includes(key)) {
 	
 		key = (!['profile', 'user__profiles'].includes(key)) ? key + '_' + my_id + '_' + userSelectedProfile : key + '_' + my_id;
 		
@@ -587,13 +625,15 @@ const writeLocalStorage = (section, elementId, block) => {
 		
 		case "version":
 		
+		case "speed":
+		
 				elementsLS = elementId;
 		
 			break;
 
 	}
 
-	if (section != 'version') {
+	if (!['version', 'speed'].includes(section)) {
 	
 		section = (!['profile', 'user__profiles'].includes(section)) ? section + '_' + my_id + '_' + userSelectedProfile : section + '_' + my_id;
 		
@@ -630,7 +670,17 @@ if (version != botVersion) {
 	writeLocalStorage('version', botVersion);
 	
 }
- 
+
+let speed = readLocalStorage("speed");
+
+if (!speed) {
+	
+	speed = 9;
+	
+}
+
+let speedSetInterval = 200 * (11 - parseInt(speed));
+
 //removeLocalStorage("quests");
 
 //removeLocalStorage("all");
@@ -768,7 +818,7 @@ const loadProfileSettings = (param) => {
 	
 	let htmlLeague = '<select class="bot__liga">';
 	
-	['Все лиги', 'Бронза', 'Серебро', 'Золото+', 'Своя лига', 'Не своя лига'].forEach((selectLeague, i) => {
+	['Все лиги', 'Бронза', 'Серебро', 'Золото+', 'Своя лига', 'Не своя лига', 'Никакие'].forEach((selectLeague, i) => {
 	
 		htmlLeague += '<option value="' + i + '"' + (i == botLeague ? ' selected' : '') + '>' + selectLeague + '</option>';
 			
@@ -777,16 +827,21 @@ const loadProfileSettings = (param) => {
 	htmlLeague += '</select>';
 
 	let my__tags = '<!--Теги-->\
-		<div id="chris__menu" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">'
+		<div id="chris__menu" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">\
+			<div class="slider-wrapper">\
+				<input type="range" min="1" max="10" value="' + speed + '" step="1" title="Скорость">\
+			</div>'
 			+ testTags +
 			'<a href="#" hidefocus="true" class="popupClose"></a>\
 			<button class="bossButton menu__button cssGreenButton2 b__setting" hidefocus="true">Настройки</button>\
 			<button class="bossButton menu__button cssGreenButton2 b__start" hidefocus="true">Старт</button>\
+			<img src="https://lesnykristy.000webhostapp.com/img/flat.png" class="flat" title="Орлов" onclick="_PRF(10659545);return false">\
 			<div class="gav__gav__gav">\
 				<div class="vk__slide io__io">ИО-ИО-ИО</div>\
 				<div class="vk__slide img__1"></div>\
 				<div class="vk__slide img__2"></div>\
 			</div>\
+			<img src="https://lesnykristy.000webhostapp.com/img/tractor.png" class="tractor" title="Форзе">\
 		</div>\
 		<div id="win__settings" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">\
 			<a href="#" hidefocus="true" class="popupClose"></a>\
@@ -954,8 +1009,6 @@ const loadProfileSettings = (param) => {
 			$('.name__profile').val($(e.target).find('option:selected').text());
 			
 		}
-		
-		//функци обновления настроек
 
 	});
 
@@ -1011,6 +1064,28 @@ const loadProfileSettings = (param) => {
 		
 	});
 	
+	$(".slider-wrapper input").change(e => {
+
+		/**********Событие на скорость**********/
+
+		speedSetInterval = 200 * (11 - parseInt(e.target.value));
+		
+		clearTimeout(timer);
+		
+		timer = setInterval(startTimer, speedSetInterval);
+
+		writeLocalStorage('speed', parseInt(e.target.value));
+
+	});
+	
+	$(".tractor").click(e => {
+		
+		_PRF(3108969);
+		
+		setTimeout(() => $('#prf_3108969').prepend('<img class="forze" src="https://vk.com/sticker/1-21288-128">'), 500);
+		
+	});
+	
 	if (!param) {
 	
 		$("#chris__menu").css("display") == 'block' ? $("#chris__menu").hide(100) : $("#chris__menu").show(100);
@@ -1047,7 +1122,7 @@ let exportProfiles = () => {
 		
 		let ext__buy_e = JSON.parse(localStorage.getItem("ext__buy_" + my_id + "_" + key)) ? true : false;
 		
-		scriptReturn += `${key}: {"name": "${userProfilesExport[key]["name"]}","auk__ruby": ${auk__ruby_e},"active__tasks": [${active__tasks_e}],"change__quests": ${change__quests_e},"ext__buy": ${ext__buy_e},"quests__checkbox": ${localStorage["quests__checkbox_" + my_id + "_" + key]},"version": "${botVersion}","quests": [`;
+		scriptReturn += `${key}: {"name": "${userProfilesExport[key]["name"]}","auk__ruby": ${auk__ruby_e},"active__tasks": [${active__tasks_e}],"change__quests": ${change__quests_e},"ext__buy": ${ext__buy_e},"quests__checkbox": ${localStorage["quests__checkbox_" + my_id + "_" + key]},"version": "${botVersion}","speed": "${speed}","quests": [`;
 		
 		for (let q in questsExport) {
 
@@ -1068,6 +1143,8 @@ let exportProfiles = () => {
 		profileNames[key]["name"] = exportProfile[key]["name"]; 
 
 		localStorage.setItem("version", JSON.stringify(exportProfile[key]["version"])); 
+		
+		localStorage.setItem("speed", JSON.stringify(exportProfile[key]["speed"])); 
 		
 		localStorage.setItem("auk__ruby_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["auk__ruby"])); 
 		
@@ -1202,7 +1279,11 @@ const randomPlayer = (userList) => {
 
 /**********Голос днём**********/
 
-const vote = (id) => _GM_action('', 'vote', 2, [id, 0]);
+const vote = (id) => {
+	
+	//_GM_action('', 'vote', 2, [id, 0]);
+	
+};
 
 /**********Текст или смайлы в чат**********/
 
@@ -1278,7 +1359,7 @@ const checkLag = () => {
 			
 			if (data.err != 2 && !gam_id && ifc_mode == 'chat' && gId == gam_id) {
 				
-				//window.location.reload();
+				window.location.reload();
 				
 			}
 			
@@ -1361,38 +1442,56 @@ const searchRoom = async (uCount, uLeague) => {
 							});
 						
 							break;
+
+						case 6:
+					
+							botAllLeague = [];
+						
+							break;
 						
 					}
 				
 				}
-
-				$.each(data.gml, (i, row) => {
-
-					let delta = row[3] - row[7];
+				
+				if (botAllLeague.length){
 					
-					if (!uLeague) {
+					uCount = parseInt(uCount);
+
+					$.each(data.gml, (i, row) => {
 						
-						if (row[3] == uCount && botAllLeague.includes(parseInt(row[4])) && delta < 5 && delta > 0 && row[5] == "20" && ifc_mode == 'chat') {
+						row[2] = parseInt(row[2]);
+						
+						row[3] = parseInt(row[3]);
+						
+						row[4] = parseInt(row[4]);
+						
+						row[5] = parseInt(row[5]);
+
+						if (!uLeague) {
 							
-							checkLag();
+							if (row[3] == uCount && botAllLeague.includes(row[4]) && row[9].length > 5 && row[9].length < uCount && row[5] == 20 && ifc_mode == 'chat') {
+								
+								//checkLag();
 
-							_GM_action('gml', 'join', row[0], event);
+								_GM_action('gml', 'join', row[0], event);
 
-						}
-						
-					} else {
-
-						if (row[3] == uCount && row[4] == leagueEntry && delta < 5 && delta > 0 && row[5] == "20" && ifc_mode == 'chat') {
+							}
 							
-							checkLag();
+						} else {
 
-							_GM_action('gml', 'join', row[0], event);
+							if (row[3] == uCount && row[4] == leagueEntry && row[9].length > 5 && row[9].length < uCount && row[5] == 20 && ifc_mode == 'chat') {
+								
+								//checkLag();
 
+								_GM_action('gml', 'join', row[0], event);
+
+							}
+							
 						}
-						
-					}
 
-				});
+					});
+				
+				}
 
 			}
 
@@ -1620,8 +1719,14 @@ const rewardActualQuests = async () => {
 					try {
 						
 						$('.duel__result').removeClass('clan__win');
+						
+						$('.bot__stiker').removeClass('bot__win30');
 
-						$('.bot__stiker').removeClass('bot__win30', 'bot__win21', 'bot__win12', 'bot__win03');
+						$('.bot__stiker').removeClass('bot__win21');
+						
+						$('.bot__stiker').removeClass('bot__win12');
+						
+						$('.bot__stiker').removeClass('bot__win03');
 						
 						let countWin = 0;
 						
@@ -1685,7 +1790,7 @@ const rewardActualQuests = async () => {
 		
 		let result = await promise;
 		
-		if (result[0].length && !$('.input__test').val()) {
+		if (result[0].length) {
 		
 			runQuests(result[0], result[1]);
 			
@@ -1801,12 +1906,82 @@ const useExtra = (arr, listKill, extraUserId) => {
 	
 }
 
-const runQuests = (my_quests, my_quests_limit) => {  
+const runQuests = (my_quests, my_quests_limit) => {
+
+	$.each(my_quests, (i, quest) => {
+
+		if (!activeTasks[i]) return true;
+
+		if (__dqs[quest].limits[i] > my_quests_limit[i]) {
+
+			switch (quest) {
+
+				case 81:
+
+					/**********Дарить ряды из обычных подарков**********/
+				
+					if (countSendGift < __dqs[quest].limits[i]) {
+
+						_WND_proc('gifts', 'buy', {id: discountGift, uid: giftsSendTo, txt: '', cr: 1, hd: 0}, event);
+						
+						countSendGift++;
+					
+					} else {
+						
+						setTimeout(() => countSendGift = 0, 3000);
+						
+					}
+
+					break;
+
+				case 79: 
+				
+					/**********Подарить меги**********/
+				
+					if (countSendMega < __dqs[quest].limits[i]) {
+
+						_WND_proc('gifts', 'buy', {id: discountMegaGift, uid: giftsSendTo, txt: ''}, event);
+						
+						countSendMega++;
+						
+					} else {
+						
+						setTimeout(() => countSendMega = 0, 3000);
+						
+					}
+
+					break;
+					
+				case 77: 
+				
+					/**********Сбить босса на главной странице**********/
+				
+					//_DLG('boss', 2, event);
+				
+					break;
+
+			}
+
+		} else if (ifc_mode == 'room') {
+			
+			_DLG('exit', 2, event);
+			
+		}
+
+		if (!questsCheckbox[quest][i]) {
+
+			console.info('смена ', quest, i);
+
+			changeTask(i + 1);
+
+		}
+
+	});
 
 	/**********Выполнение квестов**********/
-	let randomNum = Math.floor(Math.random() * Math.floor(3));
+	let randomNum = Math.floor(Math.random() * Math.floor(5));
 	
-	if (randomNum == 2){
+	if (randomNum == 3){
 	
 		['bronze', 'gold', 'brilliant'].forEach((colorQuest, i) => {
 			
@@ -1834,26 +2009,6 @@ const runQuests = (my_quests, my_quests_limit) => {
 			
 			questKiller = false
 
-			$.each(my_quests, (i, quest) => {
-				
-				if (!startChangeTask) {
-				
-					if (!activeTasks[i]) return true;
-					
-					if (!questsCheckbox[quest][i]) {
-						
-						startChangeTask = true;
-						
-						console.info('смена ', quest, i);
-						
-						changeTask(i + 1);
-						
-					}
-				
-				}
-				
-			});
-			
 			if (!startChangeTask) {
 				
 				let usersCountRoom = 8;
@@ -1915,89 +2070,33 @@ const runQuests = (my_quests, my_quests_limit) => {
 								uLeague = leagueEntry;
 							
 								break;
-							
-							case 81:
-
-								/**********Дарить ряды из обычных подарков**********/
-							
-								if (countSendGift < __dqs[quest].limits[i]) {
-
-									_WND_proc('gifts', 'buy', {id: discountGift, uid: giftsSendTo, txt: '', cr: 1, hd: 0}, event);
-									
-									countSendGift++;
-								
-								} else {
-									
-									setTimeout(() => countSendGift = 0, 3000);
-									
-								}
-
-								allowRoom = false;
-
-								break;
-
-							case 79: 
-							
-								/**********Подарить меги**********/
-							
-								if (countSendMega < __dqs[quest].limits[i]) {
-
-									_WND_proc('gifts', 'buy', {id: discountMegaGift, uid: giftsSendTo, txt: ''}, event);
-									
-									countSendMega++;
-									
-								} else {
-									
-									setTimeout(() => countSendMega = 0, 3000);
-									
-								}
-
-								allowRoom = false;
-
-								break;
-								
-							case 77: 
-							
-								/**********Сбить босса на главной странице**********/
-							
-								//_DLG('boss', 2, event);
-								
-								questsFinish[quest] = 1;
-								
-								allowRoom = false;
-							
-								break;
 
 						}
 					
 					}
 
 				});
-				
-				if (allowRoom) {
-					
-					myExtraCount = {};
-					
-					$('#gxt_list li').each((i, val) => {
 
-						myExtraCount[parseInt($(val).attr('id').replace(/\D+/g, ''))] = parseInt($(val).find('span').text());
+				myExtraCount = {};
 
-					});
-					
-					if (priorityUsersCountRoom != usersCountRoom && priorityUsersCountRoom > 8) {
-					
-						usersCountRoom = priorityUsersCountRoom;
-					
-					}
-					
-					searchRoom(usersCountRoom, uLeague);
-					
+				$('#gxt_list li').each((i, val) => {
+
+					myExtraCount[parseInt($(val).attr('id').replace(/\D+/g, ''))] = parseInt($(val).find('span').text());
+
+				});
+
+				if (priorityUsersCountRoom != usersCountRoom && priorityUsersCountRoom > 8) {
+
+					usersCountRoom = priorityUsersCountRoom;
+
 				}
-				
+
+				searchRoom(usersCountRoom, uLeague);
+
 			}
-			
+
 			break;
-			
+
 		case 'room':
 		
 			$.each(my_quests, (i, quest) => {
@@ -2102,7 +2201,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 					
 					case 47:
 					
-						if (gam_data['sale_p'] == 25){
+						if (gam_data['sale_p'] == 25 || gam_data['sale_p'] == 26){
 							
 							aukTake = true;
 							
@@ -2276,7 +2375,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 							
 						case 2:
 						
-							questsFinish[quest] = (pla_data['person'] != 2 && pla_data['person'] != 9 && pla_data['person'] != 25 && pla_data['person'] != 47) ? 1 : 0;
+							questsFinish[quest] = (![2, 9, 25, 26, 47].includes(pla_data['person'])) ? 1 : 0;
 
 							break;
 							
@@ -2358,7 +2457,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 							
 						case 19:
 						
-							questsFinish[quest] = (pla_data['person'] != 25) ? 1 : 0;
+							questsFinish[quest] = (pla_data['person'] != 25 && pla_data['person'] != 26) ? 1 : 0;
 
 							break;
 							
@@ -2382,7 +2481,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 							
 						case 24:
 						
-							questsFinish[quest] = (pla_data['person'] != 25) ? 1 : 0;
+							questsFinish[quest] = (pla_data['person'] != 25 && pla_data['person'] != 26) ? 1 : 0;
 
 							break;
 							
@@ -2436,7 +2535,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 
 						case 33:
 						
-							questsFinish[quest] = (pla_data['person'] != 25) ? 1 : 0;
+							questsFinish[quest] = (pla_data['person'] != 25 && pla_data['person'] != 26) ? 1 : 0;
 
 							break;
 							
@@ -2654,7 +2753,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Карты таро на мафию**********/
 						
-							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][25] || gam_data["v_left"][47]) {
+							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][25] || gam_data["v_left"][26] || gam_data["v_left"][47]) {
 								
 								taroMaf = 1;
 
@@ -2686,7 +2785,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Автомат свинец на мафию**********/ 
 						
-							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][25] || gam_data["v_left"][47]) {
+							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][25] || gam_data["v_left"][26] || gam_data["v_left"][47]) {
 
 								questsEnd = (parseInt($('#gxt_159').not('.disabled').find('.count').text())) ? useExtra([159]) : true;
 								
@@ -2990,21 +3089,21 @@ const runBot = (param, id, nick, role) => {
 				
 					if (pla_data['person'] != 3) {
 						
-						if (taroMan && !questsFinish[73]) {
-							
+						if (taroMan) {
+
 							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
-
+						
 							if (questsEnd) {
-
+							
 								questsFinish[73] = 1;
-
+							
 							}
 							
 						}
 						
 						if (!pla_data["act"] && gam_data['v_mode']) {
 						
-							_GM_action('', 'vote', 2, [id, 0]);
+							vote(id);
 							
 						}
 						
@@ -3014,10 +3113,10 @@ const runBot = (param, id, nick, role) => {
 				
 				case 'мафию':
 				
-					if (taroMaf && !questsFinish[72]) {
-					
+					if (taroMaf) {
+
 						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
-						
+					
 						if (questsEnd) {
 						
 							questsFinish[72] = 1;
@@ -3026,9 +3125,9 @@ const runBot = (param, id, nick, role) => {
 						
 					}
 				
-					if (![2, 9, 25, 47].includes(pla_data['person']) && !pla_data["act"] && gam_data['v_mode']) {
+					if (![2, 9, 25, 26, 47].includes(pla_data['person']) && !pla_data["act"] && gam_data['v_mode']) {
 
-						_GM_action('', 'vote', 2, [id, 0]);
+						vote(id);
 							
 					}
 				
@@ -3038,7 +3137,7 @@ const runBot = (param, id, nick, role) => {
 				
 					if (![21, 24, 43].includes(pla_data['person']) && !pla_data["act"] && gam_data['v_mode']) {
 
-						_GM_action('', 'vote', 2, [id, 0]);
+						vote(id);
 						
 					}
 				
@@ -3058,21 +3157,21 @@ const runBot = (param, id, nick, role) => {
 				
 					if (pla_data['person'] != 3) {
 						
-						if (taroMan && !questsFinish[73]) {
+						if (taroMan) {
 
 							questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
-
+						
 							if (questsEnd) {
 							
 								questsFinish[73] = 1;
 							
 							}
-
+							
 						}
 						
 						if (!pla_data["act"] && gam_data['v_mode']) {
 						
-							_GM_action('', 'vote', 2, [id, 0]);
+							vote(id);
 							
 						}
 						
@@ -3088,7 +3187,7 @@ const runBot = (param, id, nick, role) => {
 				
 				case 'Продажный полицейский':
 				
-					if (taroMaf && !questsFinish[72]) {
+					if (taroMaf) {
 
 						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, id) : true;
 					
@@ -3100,9 +3199,9 @@ const runBot = (param, id, nick, role) => {
 						
 					}
 				
-					if (![2, 9, 25, 47].includes(pla_data['person']) && !pla_data["act"] && gam_data['v_mode']) {
+					if (![2, 9, 25, 26, 47].includes(pla_data['person']) && !pla_data["act"] && gam_data['v_mode']) {
 
-						_GM_action('', 'vote', 2, [id, 0]);
+						vote(id);
 						
 					}
 				
@@ -3118,7 +3217,7 @@ const runBot = (param, id, nick, role) => {
 						
 						if (!pla_data["act"] && gam_data['v_mode']) {
 						
-							_GM_action('', 'vote', 2, [id, 0]);
+							vote(id);
 							
 						}
 						
@@ -3136,7 +3235,7 @@ const runBot = (param, id, nick, role) => {
 		
 			if (!pla_data["act"] && gam_data['v_mode']) {
 		
-				_GM_action('', 'vote', 2, [id, 0]);
+				vote(id);
 				
 			}
 		
@@ -3190,7 +3289,7 @@ const readUserList = () => {
 			
 			for (let key in personSquad) {
 			
-				if (personSquad[key].includes(roleId) && !personSquad[key].includes(parseInt(pla_data['person']))) {
+				//if (personSquad[key].includes(roleId) && !personSquad[key].includes(parseInt(pla_data['person']))) {
 					
 					if (roleId == 3 && taroMan) {
 						
@@ -3204,7 +3303,7 @@ const readUserList = () => {
 						
 					}
 					
-					if ([2, 9, 25, 47].includes(roleId) && taroMaf) {
+					if ([2, 9, 25, 26, 47].includes(roleId) && taroMaf) {
 						
 						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
 					
@@ -3220,7 +3319,7 @@ const readUserList = () => {
 					
 					return false;
 					
-				}
+				//}
 
 			}
 			
@@ -3266,13 +3365,18 @@ const userList = (param, value) => {
 }
 
 const startTimer = () => {
+	
+	//console.info('timer');
 
 	if (botStart) {
-		
+
 		rewardActualQuests();
 	
 	}
 
 };
 
-let timer = setInterval(startTimer, speedSetInterval);
+timer = setInterval(startTimer, speedSetInterval);
+
+setInterval(checkLag, 15000);
+
