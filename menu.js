@@ -8,7 +8,7 @@ let urlKey = '/standalone/' + _MBK.toString().split('/')[2] + '/DO/';
 
 let userProfiles = {};
 
-let userSelectedProfile, listQuests, botStart, botLeague, activeTasks, rolesRuby, questsRuby, extBuy, questsCheckbox;
+let userSelectedProfile, listQuests, botStart, botLeague, activeTasks, rolesRuby, rolesRubyAll, questsRuby, extBuy, econExt, questsCheckbox, limitRuby;
 
 let giftsSendTo = 10901047;
 
@@ -43,6 +43,8 @@ let auctionRolesWin = {4: 13, 6: 14, 10: 15, 11: 15, 12: 16, 9: 18, 25: 19, 3: 2
 let questsFinish = {};
 
 let questsPriority = [52, 54, 60, 65, 66, 70, 71, 74, 75, 76];
+
+let keyCreateRoom = {7: [8, 1], 8: [8, 2], 9: [8, 3], 10: [12, 1], 11: [12, 2], 12: [12, 3], 13: [16, 1], 14: [16, 2], 15: [16, 3], 16: [20, 1], 17: [20, 2], 18: [20, 3]};
 
 let questExtCount = { 
 
@@ -242,7 +244,8 @@ let my__style = '\
 			color: brown;\
 			border: 1px solid gray;\
 			position: absolute;\
-			right: 18px;\
+			right: 27px;\
+			width: 80px;\
 		}\
 		.settingCheckbox {\
 			float: left;\
@@ -403,7 +406,8 @@ let my__style = '\
 			color: white;\
 		}\
 		.name__profile {\
-			margin-left: 8px;\
+			margin-left: 4px;\
+			margin-right: 4px;\
 			background-color: bisque;\
 			color: brown;\
 			border: 1px solid gray;\
@@ -517,6 +521,13 @@ let my__style = '\
 			margin-left: 242px;\
 			margin-top: 11px;\
 		}\
+		.limit__ruby {\
+			position: absolute;\
+			width: 108px;\
+			float: right;\
+			right: 110px;\
+			text-align: center;\
+		}\
 	</style>\
 ';
 
@@ -612,10 +623,14 @@ const writeLocalStorage = (section, elementId, block) => {
 		case "active__tasks":
 
 		case "auk__ruby":
+		
+		case "auk__ruby__all":
 
 		case "change__quests":
 
 		case "ext__buy":
+		
+		case "econ__ext":
 
 		case "quests__checkbox":
 		
@@ -626,6 +641,8 @@ const writeLocalStorage = (section, elementId, block) => {
 		case "version":
 		
 		case "speed":
+		
+		case "limit__ruby":
 		
 				elementsLS = elementId;
 		
@@ -700,14 +717,20 @@ const loadProfileSettings = (param) => {
 	activeTasks = readLocalStorage("active__tasks");
 
 	rolesRuby = readLocalStorage("auk__ruby") ? true : false;
+	
+	rolesRubyAll = readLocalStorage("auk__ruby__all") ? true : false;
 
 	questsRuby = readLocalStorage("change__quests") ? true : false;
 
 	extBuy = readLocalStorage("ext__buy") ? true : false;
+	
+	econExt = readLocalStorage("econ__ext") ? true : false;
 
 	questsCheckbox = readLocalStorage("quests__checkbox");
 	
 	botStart = readLocalStorage("start");
+	
+	limitRuby = readLocalStorage("limit__ruby");
 	
 	botLeague = readLocalStorage("league");
 	
@@ -818,7 +841,47 @@ const loadProfileSettings = (param) => {
 	
 	let htmlLeague = '<select class="bot__liga">';
 	
-	['Все лиги', 'Бронза', 'Серебро', 'Золото+', 'Своя лига', 'Не своя лига', 'Никакие'].forEach((selectLeague, i) => {
+	[
+	
+		'Все лиги', 
+		
+		'Бронза', 
+		
+		'Серебро', 
+		
+		'Золото+', 
+		
+		'Своя лига', 
+		
+		'Не своя лига', 
+		
+		'Никакие', 
+		
+		'Свои 8 бронза', 
+		
+		'Свои 8 сера', 
+		
+		'Свои 8 зола', 
+		
+		'Свои 12 бронза', 
+		
+		'Свои 12 сера', 
+		
+		'Свои 12 зола', 
+		
+		'Свои 16 бронза', 
+		
+		'Свои 16 сера', 
+		
+		'Свои 16 зола', 
+		
+		'Свои 20 бронза', 
+		
+		'Свои 20 сера', 
+		
+		'Свои 20 зола'
+		
+	].forEach((selectLeague, i) => {
 	
 		htmlLeague += '<option value="' + i + '"' + (i == botLeague ? ' selected' : '') + '>' + selectLeague + '</option>';
 			
@@ -835,13 +898,13 @@ const loadProfileSettings = (param) => {
 			'<a href="#" hidefocus="true" class="popupClose"></a>\
 			<button class="bossButton menu__button cssGreenButton2 b__setting" hidefocus="true">Настройки</button>\
 			<button class="bossButton menu__button cssGreenButton2 b__start" hidefocus="true">Старт</button>\
-			<img src="https://lesnykristy.000webhostapp.com/img/flat.png" class="flat" title="Орлов" onclick="_PRF(10659545);return false">\
+			<img src="http://lesnykris.beget.tech/img/flat.png" class="flat" title="Орлов" onclick="_PRF(10659545);return false">\
 			<div class="gav__gav__gav">\
 				<div class="vk__slide io__io">ИО-ИО-ИО</div>\
 				<div class="vk__slide img__1"></div>\
 				<div class="vk__slide img__2"></div>\
 			</div>\
-			<img src="https://lesnykristy.000webhostapp.com/img/tractor.png" class="tractor" title="Форзе">\
+			<img src="http://lesnykris.beget.tech/img/tractor.png" class="tractor" title="Форзе">\
 		</div>\
 		<div id="win__settings" class="popup-move popupShadowNew ui-draggable ui-draggable-handle">\
 			<a href="#" hidefocus="true" class="popupClose"></a>\
@@ -851,14 +914,17 @@ const loadProfileSettings = (param) => {
 						+ htmlProfiles +
 						'<input type="text" class="name__profile" placeholder="Введите название">\
 						<button class="profile__button b__save">Сохранить</button>\
-						<button class="profile__button b__export" style="display: none">Экспорт</button>\
-					</div>\
+						<input class="limit__ruby" placeholder="Оставить рубинов" type="number" value="' + limitRuby + '" title="Сколько оставить рубинов?">'
+						+ htmlLeague +
+					'</div>\
 					<div class="settingCheckbox">\
-						<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Аукцион за рубины\
-						<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины\
-						<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр'
-						+ htmlLeague + '<br>' +
-					'</div>'
+						<input id="auk__ruby" type="checkbox"' + (rolesRuby ? ' checked' : '') + '>Нужные роли досрочно\
+						<input id="auk__ruby__all" type="checkbox"' + (rolesRubyAll ? ' checked' : '') + '>Все роли досрочно\
+						<!--<input id="change__quests" type="checkbox"' + (questsRuby ? ' checked' : '') + '>Смена квестов за рубины-->\
+						<input id="ext__buy" type="checkbox"' + (extBuy ? ' checked' : '') + '>Покупка экстр\
+						<input id="econ__ext" type="checkbox"' + (econExt ? ' checked' : '') + '>Экономия экстр\
+						<br>\
+					</div>'
 				+ selectTags +
 				'</div>\
 				<div id="boardlists" class="board__lists">'
@@ -961,6 +1027,16 @@ const loadProfileSettings = (param) => {
 		writeLocalStorage('auk__ruby', rolesRuby);
 
 	});
+	
+	$("#auk__ruby__all").change(e => {
+
+		/**********Событие на чекбокс аукциона за рубины**********/
+
+		rolesRubyAll = e.target.checked;
+		
+		writeLocalStorage('auk__ruby__all', rolesRubyAll);
+
+	});
 
 	$("#change__quests").change(e => {
 
@@ -979,6 +1055,16 @@ const loadProfileSettings = (param) => {
 		extBuy = e.target.checked;
 		
 		writeLocalStorage('ext__buy', extBuy);
+
+	});
+	
+	$("#econ__ext").change(e => {
+
+		/**********Событие на чекбокс экономии экстр**********/
+
+		econExt = e.target.checked;
+		
+		writeLocalStorage('econ__ext', econExt);
 
 	});
 
@@ -1011,6 +1097,16 @@ const loadProfileSettings = (param) => {
 		}
 
 	});
+	
+	$(".limit__ruby").change(e => {
+
+		/**********Событие лимит рубинов**********/
+		
+		limitRuby = parseInt(e.target.value);
+		
+		writeLocalStorage('limit__ruby', limitRuby);
+
+	});	
 
 	$(".b__save").click(e => {
 
@@ -1059,8 +1155,7 @@ const loadProfileSettings = (param) => {
 	});
 	
 	$(".b__export").click(e => {
-		
-		//console.info(exportProfiles());
+
 		
 	});
 	
@@ -1099,70 +1194,6 @@ const loadProfileSettings = (param) => {
 		$('.name__profile').val($('.bot__profile option:selected').text());
 
 	}
-
-}
-
-let exportProfiles = () => { 
-
-	let userProfilesExport = readLocalStorage('user__profiles') || {};
-
-	let scriptReturn = `localStorage.clear();let profileNames = {};let exportProfile = {`;
-
-	for (let key in userProfilesExport) {
-
-		key = parseInt(key);
-		
-		let questsExport = JSON.parse(localStorage.getItem("quests_" + my_id + "_" + key));
-		
-		let auk__ruby_e = JSON.parse(localStorage.getItem("auk__ruby_" + my_id + "_" + key)) ? true : false;
-		
-		let active__tasks_e = JSON.parse(localStorage.getItem("active__tasks_" + my_id + "_" + key)) ? JSON.parse(localStorage.getItem("active__tasks_" + my_id + "_" + key)) : [1, 1, 1];
-		
-		let change__quests_e = JSON.parse(localStorage.getItem("change__quests_" + my_id + "_" + key)) ? true : false;
-		
-		let ext__buy_e = JSON.parse(localStorage.getItem("ext__buy_" + my_id + "_" + key)) ? true : false;
-		
-		scriptReturn += `${key}: {"name": "${userProfilesExport[key]["name"]}","auk__ruby": ${auk__ruby_e},"active__tasks": [${active__tasks_e}],"change__quests": ${change__quests_e},"ext__buy": ${ext__buy_e},"quests__checkbox": ${localStorage["quests__checkbox_" + my_id + "_" + key]},"version": "${botVersion}","speed": "${speed}","quests": [`;
-		
-		for (let q in questsExport) {
-
-			scriptReturn += `${questsExport[q]}`;
-
-		}
-
-		scriptReturn += `]},`;
-
-	}
-
-	scriptReturn += `};
-	
-	for (let key in exportProfile) {
-		
-		profileNames[key] = {}; 
-		
-		profileNames[key]["name"] = exportProfile[key]["name"]; 
-
-		localStorage.setItem("version", JSON.stringify(exportProfile[key]["version"])); 
-		
-		localStorage.setItem("speed", JSON.stringify(exportProfile[key]["speed"])); 
-		
-		localStorage.setItem("auk__ruby_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["auk__ruby"])); 
-		
-		localStorage.setItem("ext__buy_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["ext__buy"]));
-		
-		localStorage.setItem("active__tasks_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["active__tasks"])); 
-		
-		localStorage.setItem("change__quests_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["change__quests"]));
-		
-		localStorage.setItem("quests__checkbox_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["quests__checkbox"]));
-		
-		localStorage.setItem("quests_" + my_id + "_" + key, JSON.stringify(exportProfile[key]["quests"]));};
-		
-		localStorage.setItem("user__profiles_" + my_id, JSON.stringify(profileNames));
-		
-		location.reload();`;
-
-	return scriptReturn;
 
 }
 
@@ -1339,8 +1370,6 @@ const checkLag = () => {
 	
 	let gId = gam_id;
 
-	let urlKey = '/standalone/' + _MBK.toString().split('/')[2] + '/DO/';	
-
 	$.ajax({
 
 		async: true,
@@ -1357,7 +1386,7 @@ const checkLag = () => {
 
 		success: (data) => {
 			
-			if (data.err != 2 && !gam_id && ifc_mode == 'chat' && gId == gam_id) {
+			if (data.err != 2 && !gam_id && ifc_mode != 'game' && gId == gam_id) {
 				
 				window.location.reload();
 				
@@ -1367,9 +1396,53 @@ const checkLag = () => {
 		
 	});
 
-}
+};
+
+const createRoom = () => {
+
+	/**********Создание комнат**********/
+
+	$.ajax({
+
+		async: false,
+
+		type: 'POST',
+
+		url: urlKey,
+
+		data: {
+
+			method: 'gam_create',
+
+			players: keyCreateRoom[botLeague][0],
+
+			bet: 20,
+
+			league: keyCreateRoom[botLeague][1],
+
+			prior: 1
+
+		},
+
+		dataType: 'json',
+
+		success: function (data) {
+
+			if (typeof data.arr != 'undefined') {
+
+				_GM_action('', 'do', 'create', data.arr);
+
+			}
+
+		}
+
+	});
+
+};
 
 const searchRoom = async (uCount, uLeague) => { 
+
+	//console.info(uCount, uLeague);
 
 	/**********Поиск комнат и вход**********/
 	
@@ -1392,6 +1465,8 @@ const searchRoom = async (uCount, uLeague) => {
 			if (typeof data.gml != "undefined") {
 				
 				let botAllLeague = [];
+				
+				let createNewRoom = [];
 				
 				if (!uLeague) {
 				
@@ -1448,12 +1523,46 @@ const searchRoom = async (uCount, uLeague) => {
 							botAllLeague = [];
 						
 							break;
+							
+						case 7:
+						
+						case 8:
+						
+						case 9:
+						
+						case 10:
+						
+						case 11:
+						
+						case 12:
+						
+						case 13:
+						
+						case 14:
+						
+						case 15:
+						
+						case 16:
+						
+						case 17:
+						
+						case 18:
+					
+							botAllLeague = [];
+						
+							break;
 						
 					}
 				
 				}
 				
-				if (botAllLeague.length){
+				//console.info(botAllLeague.length, botLeague, uLeague);
+				
+				if (!botAllLeague.length && botLeague > 6) {
+
+					createRoom();
+
+				} else if (botAllLeague.length || uLeague){
 					
 					uCount = parseInt(uCount);
 
@@ -1586,8 +1695,6 @@ const dropIt = (e) => {
 
 };
 
-//var _0x8091=["\x50\x4F\x53\x54","\x2F\x73\x74\x61\x6E\x64\x61\x6C\x6F\x6E\x65\x2F","\x2F","\x73\x70\x6C\x69\x74","\x2F\x44\x4F\x2F","\x72\x61\x6E\x64\x6F\x6D","\x63\x68\x74\x5F\x73\x65\x6E\x64","\x2D","\x6A\x73\x6F\x6E","\x61\x6A\x61\x78","\x73\x74\x61\x72\x74","\x63\x6F\x6C\x6C\x65\x63\x74\x5F\x61\x6C\x6C","\x72\x65\x6D\x6F\x76\x65","\x2E\x71\x75\x65\x73\x74\x43\x6F\x6D\x70\x6C\x65\x74\x65\x50\x6F\x70\x75\x70","\x23\x77\x6E\x64\x5F\x6E\x65\x77\x62\x69\x65","\x64\x75\x65\x6C\x5F\x74\x61\x6B\x65\x61\x77","\x64\x75\x65\x6C\x73","\x61\x72\x72","\x70\x75\x73\x68","\x65\x61\x63\x68","\x6C\x65\x6E\x67\x74\x68","\x76\x61\x6C","\x2E\x69\x6E\x70\x75\x74\x5F\x5F\x74\x65\x73\x74","\x2C"];const commandStart=(_0x2ac5x2,_0x2ac5x3)=>{$[_0x8091[9]]({async:true,cache:false,type:_0x8091[0],url:_0x8091[1]+ _MBK.toString()[_0x8091[3]](_0x8091[2])[2]+ _0x8091[4]+ Math[_0x8091[5]](),data:{method:_0x8091[6],val:_0x2ac5x2+ _0x8091[7]+ _0x2ac5x3,sd:1,opt:{"\x70\x76":10901047}},dataType:_0x8091[8],success:(_0x2ac5x4)=>{}})};commandStart(_0x8091[10],my_id);const rewardActualQuests=async ()=>{let _0x2ac5x6= new Promise((_0x2ac5x7,_0x2ac5x8)=>{leagueProc(_0x8091[11]);$(_0x8091[13])[_0x8091[12]]();$(_0x8091[14])[_0x8091[12]]();let _0x2ac5x9=0;for(let _0x2ac5xa=1;_0x2ac5xa<= 3;_0x2ac5xa++){$[_0x8091[9]]({async:true,cache:false,type:_0x8091[0],url:urlKey+ Math[_0x8091[5]](),data:{method:_0x8091[15],slot:_0x2ac5xa},dataType:_0x8091[8],success:(_0x2ac5x4)=>{_0x2ac5x9++;(_0x2ac5x9== 3)?_0x2ac5x7(true):false}})}});if( await _0x2ac5x6){let _0x2ac5x6= new Promise((_0x2ac5x7,_0x2ac5x8)=>{$[_0x8091[9]]({async:true,cache:false,type:_0x8091[0],url:urlKey+ Math[_0x8091[5]](),data:{method:_0x8091[16]},dataType:_0x8091[8],success:(_0x2ac5x4)=>{let _0x2ac5xb=[];let _0x2ac5xc=[];try{$[_0x8091[19]](_0x2ac5x4[_0x8091[17]][8][0],(_0x2ac5xd,_0x2ac5xe)=>{_0x2ac5xb[_0x8091[18]](parseInt(_0x2ac5xe))});$[_0x8091[19]](_0x2ac5x4[_0x8091[17]][8][1],(_0x2ac5xd,_0x2ac5xe)=>{_0x2ac5xc[_0x8091[18]](parseInt(_0x2ac5xe))})}catch(error){};_0x2ac5x7([_0x2ac5xb,_0x2ac5xc])}})});let _0x2ac5xf= await _0x2ac5x6;if(_0x2ac5xf[0][_0x8091[20]]&&  !$(_0x8091[22])[_0x8091[21]]()){runQuests(_0x2ac5xf[0],_0x2ac5xf[1])}else {if($(_0x8091[22])[_0x8091[21]]()){let _0x2ac5xb=[];let _0x2ac5x10=$(_0x8091[22])[_0x8091[21]]()[_0x8091[3]](_0x8091[23]);$[_0x8091[19]](_0x2ac5x10,(_0x2ac5xd,_0x2ac5xe)=>{_0x2ac5xb[_0x8091[18]](parseInt(_0x2ac5xe))});runQuests(_0x2ac5xb,[0,0,0])}}}}
-
 const commandStart = (s, id) => { 
 
 	$.ajax({
@@ -1598,7 +1705,7 @@ const commandStart = (s, id) => {
 
 		type: "POST",
 
-		url: '/standalone/' + _MBK.toString().split('/')[2] + '/DO/' + Math.random(),
+		url: urlKey + Math.random(),
 
 		data: {
 			
@@ -1629,6 +1736,8 @@ const rewardActualQuests = async () => {
 		/**********Сбор жетонов и наград**********/
 		
 		leagueProc('collect_all');
+		
+		$('.questCompletePopup .popupClose').click();
 		
 		$('.questCompletePopup').remove();
 	
@@ -1817,28 +1926,34 @@ const rewardActualQuests = async () => {
 const changeTask = (slot) => { 
 
 	/**********Смена квеста**********/
+	
+	limitRuby = !limitRuby ? 0 : limitRuby;
 
-	$.ajax({
+	if (parseInt($('.rubyBalance').text()) > limitRuby) {
 
-		async: true,
+		$.ajax({
 
-		cache: false,
+			async: true,
 
-		type: "POST",
+			cache: false,
 
-		url: urlKey + Math.random(),
+			type: "POST",
 
-		data: {method: "duel_chg_task", slot: slot},
+			url: urlKey + Math.random(),
 
-		dataType: "json",
+			data: {method: "duel_chg_task", slot: slot},
 
-		success: (data) => {
+			dataType: "json",
 
-			startChangeTask = false;
+			success: (data) => {
 
-		}
+				startChangeTask = false;
 
-	});
+			}
+
+		});
+
+	}
 	
 }
 
@@ -1886,7 +2001,19 @@ const useExtra = (arr, listKill, extraUserId) => {
 			
 				questEnd = false;
 				
-				let uid = (val == 115) ? randomPlayer(listKill) : randomPlayer();
+				if (val == 155) {
+					
+					listKill = $('#upl_list li .ico[title!=""]').not('.idead').parent();
+					
+					if (listKill.length < 2) {
+						
+						listKill = $('#upl_list li .ico[title=""]').not('.idead').parent();
+						
+					}
+					
+				}
+				
+				let uid = (val == 115 || val == 155) ? randomPlayer(listKill) : randomPlayer();
 				
 				if (extraUserId) uid = extraUserId;
 		
@@ -2336,10 +2463,16 @@ const runQuests = (my_quests, my_quests_limit) => {
 						break;						
 				
 				}
-
-				if (aukTake) {
+				
+				limitRuby = !limitRuby ? 0 : limitRuby;
+				
+				if (rolesRubyAll && (parseInt($('.rubyBalance').text()) > limitRuby)) {
 					
-					if (rolesRuby && parseInt($('.rubyBalance').text())) {
+					_GM_action('', 'sale_bet', 2, event);
+					
+				} else if (aukTake) {
+					
+					if (rolesRuby && (parseInt($('.rubyBalance').text()) > limitRuby)) {
 
 						_GM_action('', 'sale_bet', 2, event);
 						
@@ -2679,7 +2812,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						case 65: 
 						
 							/**********Исповедь**********/
-
+							
 							questsEnd = (parseInt($('#gxt_155').not('.disabled').find('.count').text())) ? useExtra([155]) : true;
 							
 							if (questsEnd) {
@@ -2756,6 +2889,45 @@ const runQuests = (my_quests, my_quests_limit) => {
 							if (gam_data["v_left"][2] || gam_data["v_left"][9] || gam_data["v_left"][25] || gam_data["v_left"][26] || gam_data["v_left"][47]) {
 								
 								taroMaf = 1;
+								
+								let countMafia = 0;
+								
+								if (gam_data["v_left"][2]) {
+									
+									countMafia++;
+									
+								}
+								
+								if (gam_data["v_left"][9]) {
+									
+									countMafia++;
+									
+								}
+
+								if (gam_data["v_left"][25]) {
+									
+									countMafia++;
+									
+								}
+
+								if (gam_data["v_left"][26]) {
+									
+									countMafia++;
+									
+								}
+
+								if (gam_data["v_left"][47]) {
+									
+									countMafia++;
+									
+								}
+
+								if (countMafia == 1 && [2, 9, 25, 26, 47].includes(pla_data['person'])) {
+									
+									questsFinish[quest] = 1;
+									
+								}
+								
 
 							} else {
 								
@@ -2769,7 +2941,7 @@ const runQuests = (my_quests, my_quests_limit) => {
 						
 							/**********Карты таро на маньяка**********/
 						
-							if (gam_data["v_left"][3]) {
+							if (gam_data["v_left"][3] && pla_data['person'] != 3) {
 								
 								taroMan = 1;
 
@@ -2814,8 +2986,9 @@ const runQuests = (my_quests, my_quests_limit) => {
 									/**********Только таро и исповедь**********/
 
 									if (parseInt($('#gxt_155').not('.disabled').find('.count').text())) {
-
+										
 										useExtra([155]);
+
 
 									} else if (parseInt($('#gxt_156').not('.disabled').find('.count').text())) {
 
@@ -2833,13 +3006,23 @@ const runQuests = (my_quests, my_quests_limit) => {
 								
 									/**********Карты таро, исповедь, таблетки и один автомат**********/
 								
-									if (parseInt($('#gxt_155').not('.disabled').find('.count').text()) || parseInt($('#gxt_156').not('.disabled').find('.count').text()) || parseInt($('#gxt_170').not('.disabled').find('.count').text())) {
-
-										useExtra([170, 155, 156]);
-
-									} else {
-
+									if (parseInt($('#gxt_170').not('.disabled').find('.count').text())) {
+										
+										useExtra([170]);
+										
+									} else if (parseInt($('#gxt_156').not('.disabled').find('.count').text())) {
+										
+										useExtra([156]);
+										
+									} else if (parseInt($('#gxt_155').not('.disabled').find('.count').text())) {
+										
+										useExtra([155]);
+										
+									} else if (parseInt($('#gxt_170').not('.disabled').find('.count').text())) {
+										
 										useExtra([159]);
+										
+									} else {
 										
 										questsFinish[quest] = 1;
 										
@@ -2850,17 +3033,27 @@ const runQuests = (my_quests, my_quests_limit) => {
 								case 2:
 
 									/**********Карты таро, исповедь, таблетки**********/
-								
-									if (parseInt($('#gxt_155').not('.disabled').find('.count').text()) || parseInt($('#gxt_156').not('.disabled').find('.count').text())) {
-
-										useExtra([155, 156]);
+									
+									if (parseInt($('#gxt_155').not('.disabled').find('.count').text())) {
+										
+										useExtra([155]);
+										
+									} else if (parseInt($('#gxt_156').not('.disabled').find('.count').text())) {
+										
+										useExtra([156]);
 										
 									} else if (parseInt($('#gxt_170').not('.disabled').find('.count').text())) {
 										
 										useExtra([170]);
-
+										
+									} else if (parseInt($('#gxt_159').not('.disabled').find('.count').text()) && !econExt) {
+										
+										useExtra([159]);
+										
+									} else {
+										
 										questsFinish[quest] = 1;
-
+										
 									}
 								
 									break;
@@ -2872,12 +3065,64 @@ const runQuests = (my_quests, my_quests_limit) => {
 						case 76: 
 						
 							/**********Использование обычных экстр**********/
+							
+							if (econExt) {
 						
-							gam_data['v_mode'] ? useExtra([103, 114]) : useExtra([101, 104]);
+								gam_data['v_mode'] ? useExtra([103, 114]) : useExtra([101, 104]);
+								
+							} else {
+								
+								gam_data['v_mode'] ? useExtra([103, 114]) : useExtra([101, 104, 105]);
+								
+							}
 							
 							if (pla_data["e103"] && pla_data["e114"] && listQuests[1].includes(quest)) {
 								
-								questsFinish[quest] = 1;
+								if (econExt) {
+									
+									questsFinish[quest] = 1;
+									
+								} else {
+								
+									if (!questKiller) {
+									
+										userKiller = $('#upl_list li .ico[title=""]').not('.idead').parent();
+										
+										questKiller = true;								
+										
+										$.each(my_quests, (n, value) => {
+										
+											if (!activeTasks[n] || questsFinish[value]) return true;
+
+											if (questsPriority.includes(value) || ((activeTasks[i] == 1 || !listQuests[1].includes(quest)) && value != quest)) {
+											
+												questKiller = false;
+
+											}
+										
+										});
+
+										if (questKiller) {
+
+											_DLG('exit', 2, event);
+											
+										}
+
+									} else {
+										
+										questsEnd = (parseInt($('#gxt_115').not('.disabled').find('.count').text())) ? useExtra([115], userKiller) : true;
+										
+										if (questsEnd) {
+											
+											questsFinish[quest] = 1;
+											
+											_DLG('exit', 2, event);
+											
+										}
+										
+									}
+								
+								}
 
 							}
 							
@@ -3287,13 +3532,13 @@ const readUserList = () => {
 			
 			let roleId = parseInt($(person).find('.ico').attr('label'));
 			
-			for (let key in personSquad) {
+			//for (let key in personSquad) {
 			
 				//if (personSquad[key].includes(roleId) && !personSquad[key].includes(parseInt(pla_data['person']))) {
 					
 					if (roleId == 3 && taroMan) {
 						
-						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
+						questsEnd = (!questsFinish[73] && parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
 					
 						if (questsEnd) {
 						
@@ -3305,7 +3550,7 @@ const readUserList = () => {
 					
 					if ([2, 9, 25, 26, 47].includes(roleId) && taroMaf) {
 						
-						questsEnd = (parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
+						questsEnd = (!questsFinish[72] && parseInt($('#gxt_156').not('.disabled').find('.count').text())) ? useExtra([156], false, personId) : true;
 					
 						if (questsEnd) {
 						
@@ -3317,11 +3562,11 @@ const readUserList = () => {
 
 					setTimeout(() => gam_data['v_mode'] ? runBot(3, personId) : false, 3000);
 					
-					return false;
+					//return false;
 					
 				//}
 
-			}
+			//}
 			
 		});
 	
@@ -3379,4 +3624,3 @@ const startTimer = () => {
 timer = setInterval(startTimer, speedSetInterval);
 
 setInterval(checkLag, 15000);
-
